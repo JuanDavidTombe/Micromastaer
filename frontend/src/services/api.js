@@ -1,0 +1,103 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('micromaster_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('micromaster_token');
+      localStorage.removeItem('micromaster_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const auth = {
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  logout: () => api.post('/auth/logout'),
+  me: () => api.get('/auth/me'),
+};
+
+export const dashboard = {
+  getKpis: () => api.get('/dashboard'),
+};
+
+export const cost = {
+  getRecipes: () => api.get('/cost/recipes'),
+  getStockCheck: (recipeId) => api.get(`/cost/recipes/${recipeId}/stock-check`),
+  createRecipe: (data) => api.post('/cost/recipes', data),
+  updateRecipe: (id, data) => api.patch(`/cost/recipes/${id}`, data),
+  deleteRecipe: (id) => api.delete(`/cost/recipes/${id}`),
+  simulateScale: (data) => api.post('/cost/simulate-scale', data),
+  getIngredients: () => api.get('/cost/ingredients'),
+};
+
+export const stock = {
+  getBatches: (params) => api.get('/stock/batches', { params }),
+  createBatch: (data) => api.post('/stock/batches', data),
+  getAlerts: () => api.get('/stock/alerts'),
+  getIngredientStock: () => api.get('/stock/ingredients'),
+  createEntry: (data) => api.post('/stock/entry', data),
+  createExit: (data) => api.post('/stock/exit', data),
+  // Escaneo QR de la app movil -> sincroniza con la base web
+  qrScan: (data) => api.post('/stock/qr-scan', data),
+};
+
+export const reports = {
+  get: () => api.get('/reports'),
+  costs: () => api.get('/reports/costs'),
+  stock: () => api.get('/reports/stock'),
+  orders: () => api.get('/reports/orders'),
+  // Descarga CSV real (blob)
+  download: (type) => api.get('/reports/download', { params: { type }, responseType: 'blob' }),
+};
+
+export const delivery = {
+  // Rutas (Google Maps)
+  getRoutes: (params) => api.get('/delivery/routes', { params }),
+  getRouteDetail: (id) => api.get(`/delivery/routes/${id}`),
+  createRoute: (data) => api.post('/delivery/routes', data),
+  updateRoute: (id, data) => api.patch(`/delivery/routes/${id}`, data),
+
+  // Conductores
+  getDrivers: () => api.get('/delivery/drivers'),
+
+  // Pedidos y cobro OTP
+  getOrders: (params) => api.get('/delivery/orders', { params }),
+  verifyOtp: (code) => api.post('/delivery/verify-otp', { otp_code: code }),
+  updatePayment: (data) => api.patch('/delivery/update-payment', data),
+  completePayment: (data) => api.post('/delivery/complete-payment', data),
+
+  // GPS del conductor (app movil -> API web)
+  sendLocation: (data) => api.post('/delivery/location', data),
+
+  // Novedades de campo
+  getIncidents: (params) => api.get('/delivery/incidents', { params }),
+  createIncident: (data) => api.post('/delivery/incidents', data),
+  updateIncident: (id, data) => api.patch(`/delivery/incidents/${id}`, data),
+};
+
+export const orders = {
+  list: (params) => api.get('/orders', { params }),
+  create: (data) => api.post('/orders', data),
+  get: (id) => api.get(`/orders/${id}`),
+  update: (id, data) => api.patch(`/orders/${id}`, data),
+  remove: (id) => api.delete(`/orders/${id}`),
+};
+
+export default api;
