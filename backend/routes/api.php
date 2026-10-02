@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\MicroCostController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\MicroStockController;
 use App\Http\Controllers\MicroDeliveryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\ModulePermissionMiddleware;
 
@@ -31,11 +33,42 @@ use App\Http\Middleware\ModulePermissionMiddleware;
 |
 */
 
+/*
+|--------------------------------------------------------------------------
+| RUTAS PÚBLICAS (sin token)
+|--------------------------------------------------------------------------
+| /auth/register es el único alta de cuentas sin sesión: guarda al
+| solicitante con status = PENDING y NO devuelve token, así que el acceso
+| sigue bloqueado hasta que el ADMINISTRADOR lo apruebe.
+*/
+Route::post('/auth/register', [AuthController::class, 'register'])
+    ->middleware('throttle:10,1');
+
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'write.guard'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    /*
+    |------------------------------------------------------------------
+    | PERFIL DEL USUARIO AUTENTICADO  (modal de 4 pestañas del Topbar)
+    |------------------------------------------------------------------
+    | Disponible para CUALQUIER rol: cada quien gestiona su propia cuenta.
+    | Exento de write.guard (ver WriteGuardMiddleware::EXEMPT_PREFIXES) para
+    | que el CONTADOR también pueda cambiar su contraseña y preferencias.
+    |
+    | El campo `role` NO se edita aquí: los permisos dependen sólo del login
+    | de Sanctum y los cambia el ADMINISTRADOR desde /settings#usuarios.
+    */
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::patch('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto']);
+    Route::get('/profile/photo', [ProfileController::class, 'photo']);
+    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto']);
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::patch('/profile/preferences', [ProfileController::class, 'updatePreferences']);
+    Route::delete('/profile/sessions', [ProfileController::class, 'revokeSessions']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
@@ -148,6 +181,25 @@ Route::middleware(['auth:sanctum', 'write.guard'])->group(function () {
     |------------------------------------------------------------------
     */
     Route::middleware(RoleMiddleware::class.':ADMINISTRADOR')->group(function () {
-        Route::get('/settings/users', [AuthController::class, 'me']);
+        // GESTIÓN DE USUARIOS & ROLES
+        Route::get('/settings/users', [AdminController::class, 'indexUsers']);
+        Route::post('/settings/users', [AdminController::class, 'storeUser']);
+        Route::patch('/settings/users/{user}', [AdminController::class, 'updateUser']);
+        Route::patch('/settings/users/{user}/status', [AdminController::class, 'toggleUserStatus']);
+
+        /*
+        |------------------------------------------------------------------
+        | SOLICITUDES DE REGISTRO PENDIENTES  (flujo /register)
+        |------------------------------------------------------------------
+        | La cuenta se crea en PENDING y /auth/login la rechaza con 403.
+        | Sólo el ADMINISTRADOR la habilita (aprobando) o la descarta.
+        */
+        Route::get('/admin/pending-users', [AdminController::class, 'pendingUsers']);
+        Route::post('/admin/users/{user}/approve', [AdminController::class, 'approveUser']);
+        Route::post('/admin/users/{user}/reject', [AdminController::class, 'rejectUser']);
+
+        // CONFIGURACIÓN DEL SISTEMA (perfil B2B de la empresa)
+        Route::get('/settings/company', [AdminController::class, 'showCompany']);
+        Route::patch('/settings/company', [AdminController::class, 'updateCompany']);
     });
 });

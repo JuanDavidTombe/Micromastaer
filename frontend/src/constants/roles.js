@@ -34,6 +34,49 @@ const ROLE_LABELS = {
   TRANSPORTISTA: 'Transportista',
 };
 
+/*
+ * FLUJO DE REGISTRO CON APROBACIÓN DEL ADMINISTRADOR
+ * -----------------------------------------------------
+ * Los roles que un solicitante puede pedir desde /register. ADMINISTRADOR
+ * queda excluido: sólo un administrador vigente crea administradores, y lo
+ * hace desde /settings#usuarios (nunca por auto-registro).
+ */
+export const REGISTRABLE_ROLES = [
+  {
+    value: 'OPERARIO_LOGISTICO',
+    label: 'Operario Logístico',
+    description: 'Inventario, lotes y despachos de bodega',
+  },
+  {
+    value: 'SUPERVISOR_PRODUCCION',
+    label: 'Supervisor de Producción',
+    description: 'Recetas, costos y simulación de escalamiento',
+  },
+  {
+    value: 'CONTADOR',
+    label: 'Contador',
+    description: 'Reportes, conciliaciones y descargas (solo lectura)',
+  },
+  {
+    value: 'TRANSPORTISTA',
+    label: 'Transportista / Conductor',
+    description: 'Rutas en campo, GPS, cobro con OTP y novedades',
+  },
+];
+
+/* Estados de la solicitud de registro (columna `status` de users). */
+export const REGISTRATION_STATUS = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  REJECTED: 'REJECTED',
+};
+
+export const REGISTRATION_STATUS_META = {
+  PENDING: { label: 'Pendiente', badge: 'bg-amber-100 text-amber-800 border-amber-200', dot: 'bg-amber-500' },
+  ACTIVE: { label: 'Activo', badge: 'bg-green-500/10 text-green-700 border-green-200', dot: 'bg-green-500' },
+  REJECTED: { label: 'Rechazado', badge: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
+};
+
 // Módulos que tienen entrada visible en el sidebar.
 // INICIO sólo se muestra al ADMINISTRADOR.
 export const NAV_ITEMS = [
@@ -106,5 +149,17 @@ export function can(role, action) {
 export function hasPermission(role, permission) {
   return can(role, permission);
 }
+
+/*
+ * NOTA DE SEGURIDAD
+ * -----------------
+ * El rol es un dato INMUTABLE desde la interfaz. No existe ningún selector
+ * de rol ni conmutador de vista: el Topbar muestra la etiqueta de rol como
+ * información estática y los permisos dependen exclusivamente del token
+ * emitido por Laravel Sanctum en /auth/login.
+ *
+ * El único cambio de rol posible lo realiza el ADMINISTRADOR en
+ * /settings#usuarios (API: PATCH /api/settings/users/{id}).
+ */
 
 export { ROLE_PERMISSIONS, ROLE_LABELS };

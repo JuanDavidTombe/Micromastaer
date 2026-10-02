@@ -1,38 +1,90 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import UserProfileModal from './UserProfileModal';
 
-export default function Topbar({ user, onMenuToggle }) {
+/**
+ * Topbar de MicroMaster.
+ *
+ * SEGURIDAD: la etiqueta verde de rol es ESTÁTICA e informativa. No abre
+ * ningún menú, no permite cambiar de usuario ni simular vistas. Los permisos
+ * dependen exclusivamente del login de Laravel Sanctum.
+ *
+ * El control interactivo de la esquina superior derecha es el AVATAR, que
+ * abre el modal de Perfil de Usuario en 4 pestañas.
+ */
+export default function Topbar({ user, onMenuToggle, onProfileUpdated }) {
+  const [profileOpen, setProfileOpen] = useState(false);
   const roleLabel = user?.role_label || 'Usuario';
 
+  // Cierra el modal con la tecla Escape.
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onKey = (e) => e.key === 'Escape' && setProfileOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [profileOpen]);
+
   return (
-    <header className="bg-slate-900 text-white px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onMenuToggle}
-          className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
-          title="Menú"
-        >
-          <span className="text-lg">☰</span>
-        </button>
-        <div className="h-4 w-px bg-white/20 hidden md:block"></div>
-        <div className="hidden md:flex items-center gap-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-white/50">MICROMASTER B2B</span>
-          <span className="text-xs bg-lime-400 text-slate-900 px-2 py-0.5 rounded font-bold">LIVE</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5">
-          <span className="text-xs text-white/50">🔍</span>
-          <input type="text" placeholder="Buscar..." className="bg-transparent text-xs outline-none w-40 text-white placeholder:text-white/30" />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs bg-lime-400/20 text-lime-400 px-2 py-1 rounded-lg font-mono">
-            {roleLabel}
-          </span>
-          <div className="w-8 h-8 bg-lime-400/30 rounded-full flex items-center justify-center text-xs font-bold">
-            {user?.name?.charAt(0)}
+    <>
+      <header className="bg-slate-900 text-white px-3 md:px-6 py-2.5 md:py-3 flex items-center justify-between gap-2 shrink-0 sticky top-0 z-40">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <button
+            onClick={onMenuToggle}
+            className="md:hidden shrink-0 w-10 h-10 -ml-1 flex items-center justify-center rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+            title="Menú"
+            aria-label="Abrir menú"
+          >
+            <span className="text-xl leading-none">☰</span>
+          </button>
+          <div className="h-4 w-px bg-white/20 hidden md:block"></div>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.2em] text-white/50">MICROMASTER B2B</span>
+            <span className="text-xs bg-lime-400 text-slate-900 px-2 py-0.5 rounded font-bold">LIVE</span>
           </div>
         </div>
-      </div>
-    </header>
+
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+          <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5">
+            <span className="text-xs text-white/50">🔍</span>
+            <input type="text" placeholder="Buscar..." className="bg-transparent text-xs outline-none w-40 text-white placeholder:text-white/30" />
+          </div>
+
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Etiqueta de rol: SOLO INFORMATIVA (sin interacción) */}
+            <span
+              title="Rol asignado por el administrador del sistema"
+              className="text-[10px] md:text-xs bg-lime-400/20 text-lime-400 px-2 py-1 rounded-lg font-mono truncate max-w-[7.5rem] md:max-w-none select-none cursor-default"
+            >
+              {roleLabel}
+            </span>
+
+            {/* Avatar: abre el Perfil de Usuario */}
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              title="Mi perfil"
+              aria-label="Abrir mi perfil de usuario"
+              className="group flex items-center gap-2 rounded-full pl-1 pr-1 md:pr-3 py-1 hover:bg-white/10 active:bg-white/15 transition-colors"
+            >
+              <span className="w-8 h-8 shrink-0 bg-lime-400/30 group-hover:bg-lime-400/50 rounded-full flex items-center justify-center text-xs font-bold text-white transition-colors">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </span>
+              <span className="hidden md:block text-left min-w-0 max-w-[9rem]">
+                <span className="block text-[11px] font-semibold truncate leading-tight">{user?.name}</span>
+                <span className="block text-[9px] text-lime-400 uppercase tracking-wider truncate leading-tight">
+                  Mi perfil
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <UserProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        user={user}
+        onProfileUpdated={(p) => onProfileUpdated && onProfileUpdated(p)}
+      />
+    </>
   );
 }

@@ -29,6 +29,8 @@ api.interceptors.response.use(
 
 export const auth = {
   login: (email, password) => api.post('/auth/login', { email, password }),
+  // Alta pública: guarda al solicitante con status = PENDING y NO devuelve token.
+  register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
 };
@@ -98,6 +100,43 @@ export const orders = {
   get: (id) => api.get(`/orders/${id}`),
   update: (id, data) => api.patch(`/orders/${id}`, data),
   remove: (id) => api.delete(`/orders/${id}`),
+};
+
+export const profile = {
+  // Pestaña 1: información personal y contacto
+  get: () => api.get('/profile'),
+  update: (data) => api.patch('/profile', data),
+  uploadPhoto: (file) => {
+    const form = new FormData();
+    form.append('photo', file);
+    return api.post('/profile/photo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  getPhoto: () => api.get('/profile/photo', { responseType: 'blob' }),
+  deletePhoto: () => api.delete('/profile/photo'),
+
+  // Pestaña 3: seguridad y accesos
+  changePassword: (data) => api.patch('/profile/password', data),
+  revokeSessions: () => api.delete('/profile/sessions'),
+
+  // Pestaña 4: preferencias de la aplicación (incluye el interruptor 2FA)
+  updatePreferences: (data) => api.patch('/profile/preferences', data),
+};
+
+export const admin = {
+  // GESTIÓN DE USUARIOS & ROLES
+  getUsers: () => api.get('/settings/users'),
+  createUser: (data) => api.post('/settings/users', data),
+  updateUser: (id, data) => api.patch(`/settings/users/${id}`, data),
+  toggleUserStatus: (id) => api.patch(`/settings/users/${id}/status`),
+
+  // SOLICITUDES DE REGISTRO PENDIENTES (flujo /register)
+  getPendingUsers: () => api.get('/admin/pending-users'),
+  approveUser: (id, data) => api.post(`/admin/users/${id}/approve`, data || {}),
+  rejectUser: (id, data) => api.post(`/admin/users/${id}/reject`, data || {}),
+
+  // CONFIGURACIÓN DEL SISTEMA (perfil B2B)
+  getCompany: () => api.get('/settings/company'),
+  updateCompany: (data) => api.patch('/settings/company', data),
 };
 
 export default api;

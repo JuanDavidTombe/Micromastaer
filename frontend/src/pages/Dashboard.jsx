@@ -32,7 +32,7 @@ export default function Dashboard({ user }) {
   const alerts = data?.alerts || {};
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       <div id="resumen" className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Inicio · Torre de Control</h1>

@@ -16,6 +16,60 @@ class User extends Authenticatable
     const ROLE_CONTADOR = 'CONTADOR';
     const ROLE_TRANSPORTISTA = 'TRANSPORTISTA';
 
+    /* ------------------------------------------------------------------
+     |  ESTADOS DEL FLUJO DE REGISTRO CON APROBACIÓN
+     | ------------------------------------------------------------------ */
+
+    /** Registro enviado desde /register: existe pero NO puede iniciar sesión. */
+    const STATUS_PENDING = 'PENDING';
+
+    /** Aprobado por el administrador: acceso completo según su rol. */
+    const STATUS_ACTIVE = 'ACTIVE';
+
+    /** Solicitud rechazada: no puede volver a iniciar sesión. */
+    const STATUS_REJECTED = 'REJECTED';
+
+    /**
+     * Roles que un solicitante puede pedir desde /register.
+     * ADMINISTRADOR queda excluido a propósito: sólo el ADMINISTRADOR vigente
+     * puede crear administradores, y lo hace desde /settings#usuarios.
+     */
+    public const REGISTRABLE_ROLES = [
+        self::ROLE_OPERARIO_LOGISTICO,
+        self::ROLE_SUPERVISOR_PRODUCCION,
+        self::ROLE_CONTADOR,
+        self::ROLE_TRANSPORTISTA,
+    ];
+
+    /** Etiquetas legibles del estado de la solicitud. */
+    public const STATUS_LABELS = [
+        self::STATUS_PENDING => 'Pendiente de aprobación',
+        self::STATUS_ACTIVE => 'Activo',
+        self::STATUS_REJECTED => 'Rechazado',
+    ];
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUS_LABELS[$this->status] ?? ucfirst((string) $this->status);
+    }
+
+    /** El registro fue aprobado: es el único estado que permite iniciar sesión. */
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /** Acceso efectivo = aprobado por el administrador Y no inactivado. */
+    public function canAccessSystem(): bool
+    {
+        return $this->isApproved() && (bool) $this->is_active;
+    }
+
     /**
      * MATRIZ RBAC OFICIAL MICROMASTER
      *
@@ -80,6 +134,24 @@ class User extends Authenticatable
         'phone',
         'vehicle',
         'photo_url',
+        'is_active',
+        'identity_document',
+        'employee_code',
+        'warehouse_site',
+        'shift_schedule',
+        'supervisor_name',
+        'two_factor_enabled',
+        'two_factor_method',
+        'locale',
+        'theme',
+        'notify_email',
+        'notify_push',
+        'notify_sound',
+        'status',
+        'requested_role',
+        'approved_at',
+        'approved_by',
+        'rejection_reason',
     ];
 
     protected $hidden = [
@@ -90,9 +162,81 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_active' => 'boolean',
+        'last_login_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
+        'notify_email' => 'boolean',
+        'notify_push' => 'boolean',
+        'notify_sound' => 'boolean',
     ];
 
-    protected $appends = ['role_label', 'role_permissions'];
+    protected $appends = ['role_label', 'role_permissions', 'status_label'];
+
+    /**
+     * Ficha completa del perfil propio (modal de 4 pestañas).
+     * NUNCA incluye password ni roles editables por el usuario.
+     */
+    public function profileArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'identity_document' => $this->identity_document,
+            'employee_code' => $this->employee_code,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'photo_url' => $this->photo_url,
+            'role' => $this->role,
+            'role_label' => $this->role_label,
+            'role_permissions' => $this->role_permissions,
+            'warehouse_site' => $this->warehouse_site,
+            'shift_schedule' => $this->shift_schedule,
+            'supervisor_name' => $this->supervisor_name,
+            'two_factor_enabled' => (bool) $this->two_factor_enabled,
+            'two_factor_method' => $this->two_factor_method,
+            'locale' => $this->locale ?: 'es',
+            'theme' => $this->theme ?: 'light',
+            'notify_email' => (bool) $this->notify_email,
+            'notify_push' => (bool) $this->notify_push,
+            'notify_sound' => (bool) $this->notify_sound,
+            'is_active' => (bool) $this->is_active,
+            'status' => $this->status ?: self::STATUS_ACTIVE,
+            'status_label' => $this->status_label,
+            'last_login_at' => optional($this->last_login_at)->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Etiqueta legible del dispositivo para la lista de sesiones activas.
+     * Traduce el User-Agent a algo tipo "Chrome · Windows".
+     */
+    public static function describeDevice(?string $userAgent): string
+    {
+        $ua = (string) $userAgent;
+
+        $browser = 'Navegador';
+        foreach ([
+            'Edg' => 'Edge', 'OPR' => 'Opera', 'Chrome' => 'Chrome',
+            'Firefox' => 'Firefox', 'Safari' => 'Safari',
+        ] as $needle => $name) {
+            if (stripos($ua, $needle) !== false) { $browser = $name; break; }
+        }
+
+        $platform = 'Otro dispositivo';
+        foreach ([
+            'Windows' => 'Windows', 'Android' => 'Android', 'iPhone' => 'iPhone',
+            'iPad' => 'iPad', 'Mac OS' => 'macOS', 'Linux' => 'Linux',
+        ] as $needle => $name) {
+            if (stripos($ua, $needle) !== false) { $platform = $name; break; }
+        }
+
+        if (stripos($ua, 'Mobile') !== false || stripos($ua, 'Android') !== false) {
+            return "{$browser} · {$platform} (App Móvil)";
+        }
+
+        return "{$browser} · {$platform} (Navegador Web)";
+    }
 
     public function getRoleLabelAttribute(): string
     {

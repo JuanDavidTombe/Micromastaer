@@ -111,7 +111,7 @@ export default function MicroStock({ user }) {
   const readOnly = !canWrite;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Inventario & Stock</h1>

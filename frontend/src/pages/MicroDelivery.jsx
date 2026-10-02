@@ -317,7 +317,7 @@ export default function MicroDelivery({ user }) {
 
   if (activeTab === 'payments') {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 md:space-y-6 animate-fade-in">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Cobros, Caja & OTP</h1>
@@ -340,13 +340,13 @@ export default function MicroDelivery({ user }) {
         </div>
 
         <div id="cobro" className="bg-slate-900 rounded-3xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10">
+          <div className="px-4 md:px-6 py-4 border-b border-white/10">
             <span className="text-sm uppercase tracking-[0.2em] text-lime-400 font-semibold">
               📱 Cobro OTP y registro de pagos
             </span>
           </div>
 
-          <div className="px-6 py-6 text-white">
+          <div className="px-4 md:px-6 py-4 md:py-6 text-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-xs uppercase tracking-wider text-white/70 mb-3">Verificación de Código OTP</h3>
@@ -515,7 +515,7 @@ export default function MicroDelivery({ user }) {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Pedidos & Entregas</h1>

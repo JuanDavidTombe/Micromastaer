@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { auth } from '../services/api';
 import { getDefaultRoute } from '../constants/roles';
 
@@ -6,19 +7,31 @@ export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setNotice('');
     try {
       const res = await auth.login(email, password);
       localStorage.setItem('micromaster_token', res.data.token);
       localStorage.setItem('micromaster_user', JSON.stringify(res.data.user));
       onLogin(res.data.user, res.data.token);
     } catch (err) {
-      setError('Credenciales inválidas');
+      const data = err.response?.data;
+      const status = data?.status;
+
+      // PENDING / REJECTED: el backend explica el motivo exacto y NO es un
+      // problema de credenciales, así que se muestra como aviso informativo.
+      if (status === 'PENDING' || status === 'REJECTED') {
+        setNotice(data?.error || 'Tu cuenta aún no está habilitada');
+      } else {
+        // Credenciales inválidas, usuario inactivo o cualquier otro fallo.
+        setError(data?.error || data?.message || 'Credenciales inválidas');
+      }
     }
     setLoading(false);
   };
@@ -40,6 +53,12 @@ export default function Login({ onLogin }) {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
               {error}
+            </div>
+          )}
+
+          {notice && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+              {notice}
             </div>
           )}
 
@@ -74,6 +93,16 @@ export default function Login({ onLogin }) {
               {loading ? 'INICIANDO...' : 'INICIAR SESIÓN'}
             </button>
           </div>
+
+          <p className="mt-6 text-center text-sm text-slate-500">
+            ¿No tienes cuenta?{' '}
+            <Link
+              to="/register"
+              className="font-bold text-[#4F6B00] hover:underline"
+            >
+              Regístrate aquí
+            </Link>
+          </p>
 
           <div className="mt-6 p-4 bg-cream rounded-xl">
             <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Credenciales de Prueba</p>

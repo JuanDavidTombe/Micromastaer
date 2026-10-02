@@ -19,6 +19,11 @@ use Illuminate\Support\Facades\Auth;
  *
  * Excepción: POST /auth/logout siempre está permitido (no es escritura
  * de negocio, es cierre de sesión).
+ *
+ * También se exceptúan las rutas /profile/*: el perfil personal es un dato
+ * del propio usuario, no una escritura de negocio. De lo contrario el
+ * CONTADOR (can = read + download) no podría cambiar su contraseña ni sus
+ * preferencias, pese a que son acciones sobre su propia cuenta.
  */
 class WriteGuardMiddleware
 {
@@ -28,6 +33,9 @@ class WriteGuardMiddleware
         'PATCH' => 'update',
         'DELETE' => 'delete',
     ];
+
+    /** Rutas exentas: acciones sobre la propia cuenta, nunca sobre datos de negocio. */
+    protected const EXEMPT_PREFIXES = ['auth/logout', 'profile'];
 
     public function handle(Request $request, Closure $next)
     {
@@ -39,8 +47,8 @@ class WriteGuardMiddleware
 
         $action = self::WRITE_ACTIONS[strtoupper($request->method())] ?? null;
 
-        // El cierre de sesión no requiere permisos de negocio
-        if ($action === null || str_contains($request->path(), 'auth/logout')) {
+        // El cierre de sesión y el perfil propio no requieren permisos de negocio
+        if ($action === null || $this->isExempt($request->path())) {
             return $next($request);
         }
 
@@ -54,5 +62,19 @@ class WriteGuardMiddleware
         }
 
         return $next($request);
+    }
+
+    private function isExempt(string $path): bool
+    {
+        // $request->path() incluye el prefijo registered: 'api/profile/...'
+        $path = preg_replace('#^api(/|$)#', '', $path);
+
+        foreach (self::EXEMPT_PREFIXES as $prefix) {
+            if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

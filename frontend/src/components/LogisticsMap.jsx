@@ -218,9 +218,9 @@ export default function LogisticsMap({ routes = [], selectedRouteId, onSelectRou
   }
 
   return (
-    <div className="relative w-full h-full min-h-[420px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
+    <div className="relative w-full h-[320px] md:h-[420px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
       <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%', minHeight: 420 }}
+        mapContainerStyle={{ width: '100%', height: '100%' }}
         center={DEFAULT_CENTER}
         zoom={6}
         onLoad={(m) => {
@@ -410,7 +410,7 @@ function LegendDot({ color, label, square }) {
 
 function MapPlaceholder({ title, text }) {
   return (
-    <div className="w-full h-full min-h-[420px] rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center px-8">
+    <div className="w-full h-full min-h-[320px] md:min-h-[420px] rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center px-6 md:px-8">
       <div className="text-4xl mb-3">🗺️</div>
       <p className="text-sm font-bold text-slate-700">{title}</p>
       <p className="text-xs text-slate-500 mt-1 max-w-sm">{text}</p>

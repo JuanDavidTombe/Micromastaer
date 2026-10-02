@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -9,6 +9,8 @@ import Orders from './pages/Orders';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import PendingApproval from './pages/PendingApproval';
 import { getDefaultRoute, hasModuleAccess, hasReadAccess } from './constants/roles';
 
 const ROUTE_MODULES = {
@@ -24,6 +26,27 @@ const ROUTE_MODULES = {
 function AuthenticatedApp({ user, setUser }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // El rol es el emitido por Laravel Sanctum en /auth/login. No se modifica
+  // desde la interfaz: sólo el ADMINISTRADOR lo cambia en /settings#usuarios.
+  const role = user?.role || 'ADMINISTRADOR';
+
+  // Refleja en el estado global (y en localStorage) los cambios que el
+  // usuario haga sobre su propio perfil desde el modal del Topbar.
+  //
+  // El merge se calcula FUERA del updater de setState: escribir en
+  // localStorage dentro de un updater es un efecto secundario que React
+  // puede ejecutar cero, una o dos veces según el batching.
+  const userRef = useRef(user);
+  userRef.current = user;
+
+  const handleProfileUpdated = useCallback((patch) => {
+    if (!patch) return;
+    const next = { ...(userRef.current || {}), ...patch };
+    localStorage.setItem('micromaster_user', JSON.stringify(next));
+    setUser(next);
+  }, [setUser]);
 
   useEffect(() => {
     if (!user || location.pathname === '/login') return;
@@ -32,13 +55,13 @@ function AuthenticatedApp({ user, setUser }) {
     const needsReadOnly = location.pathname === '/stock';
     const module = ROUTE_MODULES[location.pathname];
     const allowed = needsReadOnly
-      ? hasReadAccess(user.role, 'inventory_stock')
-      : hasModuleAccess(user.role, module);
+      ? hasReadAccess(role, 'inventory_stock')
+      : hasModuleAccess(role, module);
 
     if (!module || !allowed) {
-      navigate(getDefaultRoute(user.role), { replace: true });
+      navigate(getDefaultRoute(role), { replace: true });
     }
-  }, [user, location.pathname]);
+  }, [role, location.pathname]);
 
   // Anclajes internos: el sidebar navega a /ruta#seccion de la misma vista
   useEffect(() => {
@@ -47,8 +70,6 @@ function AuthenticatedApp({ user, setUser }) {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [location.pathname, location.hash]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const handleLogout = useCallback(() => {
     localStorage.removeItem('micromaster_token');
     localStorage.removeItem('micromaster_user');
@@ -56,10 +77,8 @@ function AuthenticatedApp({ user, setUser }) {
     navigate('/login', { replace: true });
   }, [setUser, navigate]);
 
-  const role = user?.role || 'ADMINISTRADOR';
-
   return (
-    <div className="flex h-screen bg-cream overflow-hidden">
+    <div className="flex h-dvh bg-cream overflow-hidden">
       {/* Overlay móvil */}
       {sidebarOpen && (
         <div
@@ -73,9 +92,9 @@ function AuthenticatedApp({ user, setUser }) {
         onToggle={() => setSidebarOpen((v) => !v)}
         onLogout={handleLogout}
       />
-      <div className="flex-1 flex flex-col md:ml-64">
-        <Topbar user={user} onMenuToggle={() => setSidebarOpen((v) => !v)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-cream">
+      <div className="flex-1 flex flex-col md:ml-64 min-w-0">
+        <Topbar user={user} onMenuToggle={() => setSidebarOpen((v) => !v)} onProfileUpdated={handleProfileUpdated} />
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-6 bg-cream dark:bg-slate-900 transition-colors">
           <Routes>
             {/* INICIO: exclusivo del administrador */}
             {hasModuleAccess(role, 'dashboard') && (
@@ -121,6 +140,12 @@ function AuthenticatedApp({ user, setUser }) {
 function App() {
   const [user, setUser] = useState(null);
 
+  // Aplica el tema oscuro ANTES de que se monte la interfaz, para que un
+  // recarga no desajuste el color. Tailwind usa la clase `dark` en <html>.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', user?.theme === 'dark');
+  }, [user?.theme]);
+
   useEffect(() => {
     const token = localStorage.getItem('micromaster_token');
     const userData = localStorage.getItem('micromaster_user');
@@ -139,7 +164,11 @@ function App() {
     return (
       <Router>
         <Routes>
+          {/* PÚBLICAS: acceso sin sesión. El registro no entrega token,
+              la cuenta nace PENDING y debe aprobar el ADMINISTRADOR. */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>

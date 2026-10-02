@@ -31,9 +31,12 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
   };
 
   return (
-    <aside className={`fixed left-0 top-0 h-full w-56 md:w-64 bg-slate-900 text-white z-50 flex flex-col border-r border-white/10 transition-transform duration-300 ${
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-    }`}>      <div className="flex items-center justify-between p-5 border-b border-white/10">
+    <aside
+      className={`fixed left-0 top-0 h-dvh w-[272px] max-w-[86vw] md:w-64 md:max-w-none bg-slate-900 text-white z-50 flex flex-col border-r border-white/10 transition-transform duration-300 will-change-transform ${
+        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0 md:shadow-none'
+      }`}
+    >
+      <div className="flex items-center justify-between px-4 py-4 md:p-5 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 bg-lime-400 rounded-xl flex items-center justify-center font-extrabold text-slate-900 text-sm shrink-0">
             MM
@@ -47,14 +50,15 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
         </div>
         <button
           onClick={onToggle}
-          className="md:hidden p-1.5 rounded-lg hover:bg-white/10 text-white/50"
+          className="md:hidden shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 active:bg-white/15 transition-colors"
           title="Cerrar menú"
+          aria-label="Cerrar menú"
         >
           ✕
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
+      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-4 space-y-2">
         {menu.map((section) => {
           const open = openId === section.id;
           return (
@@ -85,6 +89,9 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
                       <Link
                         key={item.label}
                         to={item.to}
+                        onClick={() => {
+                          if (window.innerWidth < 768) onToggle();
+                        }}
                         className={`group flex items-start gap-2.5 px-2.5 py-2 rounded-xl transition-all ${
                           active
                             ? 'bg-lime-400 text-slate-900 shadow-lg shadow-lime-400/20'
@@ -116,7 +123,7 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/10 bg-slate-900">
+      <div className="p-3 border-t border-white/10 bg-slate-900 shrink-0">
         <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/5">
           <div className="w-9 h-9 rounded-full bg-lime-400 flex items-center justify-center text-xs font-extrabold text-slate-900 shrink-0">
             {user?.name?.charAt(0) || 'U'}
