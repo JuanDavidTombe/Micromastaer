@@ -95,7 +95,6 @@ export default function LogisticsMap({ routes = [], selectedRouteId, onSelectRou
     return t;
   }, [enriched]);
 
-  // Interpolación suave entre refrescos para que el camión "vaya"
   useEffect(() => {
     if (!isLoaded) return undefined;
     let raf;
@@ -131,9 +130,6 @@ export default function LogisticsMap({ routes = [], selectedRouteId, onSelectRou
     return () => cancelAnimationFrame(raf);
   }, [isLoaded]);
 
-  // ---------------------------------------------------------------
-  // Encuadre automático (sólo cuando cambia la geometría, no el GPS)
-  // ---------------------------------------------------------------
   const boundsKey = enriched
     .map((r) => `${r.id}:${r.origin_lat ?? '-'}:${r.stops.length}:${r.stops.map((s) => s.order_id).join('.')}`)
     .join('|');
@@ -202,7 +198,6 @@ export default function LogisticsMap({ routes = [], selectedRouteId, onSelectRou
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, boundsKey]);
 
   if (!apiKey) {
@@ -411,7 +406,7 @@ function LegendDot({ color, label, square }) {
 function MapPlaceholder({ title, text }) {
   return (
     <div className="w-full h-full min-h-[320px] md:min-h-[420px] rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center px-6 md:px-8">
-      <div className="text-4xl mb-3">🗺️</div>
+      <i className="bi bi-map text-4xl mb-3" aria-hidden="true" />
       <p className="text-sm font-bold text-slate-700">{title}</p>
       <p className="text-xs text-slate-500 mt-1 max-w-sm">{text}</p>
     </div>

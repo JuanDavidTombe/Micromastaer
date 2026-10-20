@@ -23,12 +23,15 @@ class Order extends Model
         'amount',
         'received_amount',
         'change_due',
+        'contingency',
+        'contingency_reason',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'received_amount' => 'decimal:2',
         'change_due' => 'decimal:2',
+        'contingency' => 'boolean',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
     ];

@@ -13,10 +13,12 @@ class Ingredient extends Model
         'name',
         'unit',
         'cost_per_unit',
+        'min_stock',
     ];
 
     protected $casts = [
         'cost_per_unit' => 'decimal:2',
+        'min_stock' => 'decimal:4',
     ];
 
     public function batches()

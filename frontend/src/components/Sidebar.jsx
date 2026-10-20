@@ -7,10 +7,10 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
   const menu = SIDEBAR_MENU[role] || [];
   const location = useLocation();
 
-  const sectionFor = (pathname, hash) =>
-    menu.find((s) => s.items.some((it) => it.to.pathname === pathname && (!it.to.hash || it.to.hash === hash)));
+  const sectionFor = (pathname) =>
+    menu.find((s) => s.items.some((it) => it.to === pathname));
 
-  const activeSection = sectionFor(location.pathname, location.hash);
+  const activeSection = sectionFor(location.pathname);
   const [openId, setOpenId] = useState(activeSection?.id || (menu.length > 0 ? menu[0].id : null));
 
 
@@ -23,17 +23,12 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
 
   const toggle = (id) => setOpenId((cur) => (cur === id ? null : id));
 
-  const isActive = (item) => {
-    if (item.to.pathname !== location.pathname) return false;
-    const hash = location.hash.startsWith('#') ? location.hash : `#${location.hash}`;
-    if (item.to.hash) return hash === item.to.hash;
-    return !location.hash;
-  };
+  const isActive = (item) => item.to === location.pathname;
 
   return (
     <aside
       className={`fixed left-0 top-0 h-dvh w-[272px] max-w-[86vw] md:w-64 md:max-w-none bg-slate-900 text-white z-50 flex flex-col border-r border-white/10 transition-transform duration-300 will-change-transform ${
-        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0 md:shadow-none'
+        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0 lg:shadow-none'
       }`}
     >
       <div className="flex items-center justify-between px-4 py-4 md:p-5 border-b border-white/10 shrink-0">
@@ -50,11 +45,11 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
         </div>
         <button
           onClick={onToggle}
-          className="md:hidden shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 active:bg-white/15 transition-colors"
+          className="lg:hidden shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 active:bg-white/15 transition-colors"
           title="Cerrar menú"
           aria-label="Cerrar menú"
         >
-          ✕
+          <i className="bi bi-x-lg" aria-hidden="true" />
         </button>
       </div>
 
@@ -77,7 +72,7 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
                     open ? 'rotate-90' : ''
                   }`}
                 >
-                  ▸
+                  <i className="bi bi-caret-right-fill" aria-hidden="true" />
                 </span>
               </button>
 
@@ -90,7 +85,7 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
                         key={item.label}
                         to={item.to}
                         onClick={() => {
-                          if (window.innerWidth < 768) onToggle();
+                          if (window.innerWidth < 1024) onToggle();
                         }}
                         className={`group flex items-start gap-2.5 px-2.5 py-2 rounded-xl transition-all ${
                           active
@@ -98,8 +93,8 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
                             : 'text-white/70 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <span className={`text-base leading-none mt-0.5 ${active ? 'text-slate-900' : 'text-lime-400'}`}>
-                          {item.icon}
+                        <span className={`text-base leading-none mt-0.5 shrink-0 ${active ? 'text-slate-900' : 'text-lime-400'}`}>
+                          <i className={`bi bi-${item.icon}`} aria-hidden="true" />
                         </span>
                         <span className="min-w-0">
                           <span className="block text-[11px] font-bold uppercase tracking-[0.12em] leading-tight">
@@ -133,7 +128,7 @@ export default function Sidebar({ user, sidebarOpen, onToggle, onLogout }) {
             <p className="text-[9px] text-lime-400 uppercase tracking-wider truncate">{user?.role_label}</p>
           </div>
           <button onClick={onLogout} title="Cerrar sesión" className="p-1.5 rounded-lg hover:bg-red-500/20 hover:text-red-400 text-white/50 text-xs transition-colors">
-            ⏻
+            <i className="bi bi-power" aria-hidden="true" />
           </button>
         </div>
         <p className="text-center text-[9px] text-white/25 mt-2 uppercase tracking-[0.2em]">v2.4.1 · Operación con criterio</p>

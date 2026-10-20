@@ -24,12 +24,9 @@ export default function Login({ onLogin }) {
       const data = err.response?.data;
       const status = data?.status;
 
-      // PENDING / REJECTED: el backend explica el motivo exacto y NO es un
-      // problema de credenciales, así que se muestra como aviso informativo.
       if (status === 'PENDING' || status === 'REJECTED') {
         setNotice(data?.error || 'Tu cuenta aún no está habilitada');
       } else {
-        // Credenciales inválidas, usuario inactivo o cualquier otro fallo.
         setError(data?.error || data?.message || 'Credenciales inválidas');
       }
     }

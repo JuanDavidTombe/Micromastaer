@@ -1,25 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-/**
- * /pending-approval — pantalla informativa de espera.
- *
- * Se muestra tras un registro exitoso: la cuenta existe con status = PENDING
- * y el ADMINISTRADOR todavía no la ha aprobado, así que NO se inicia sesión
- * ni se guarda ningún token.
- */
 export default function PendingApproval() {
   return (
     <div className="min-h-screen bg-cream technical-grid flex items-center justify-center p-4">
       <div className="w-full max-w-lg text-center">
         <div className="bg-white/85 rounded-3xl border border-slate-200 p-6 md:p-8 backdrop-blur-sm shadow-xl">
-          {/* Logo MM */}
           <div className="inline-flex items-center justify-center w-16 h-16 bg-lime-400 rounded-3xl mb-4">
             <span className="text-2xl font-bold text-slate-900">MM</span>
           </div>
 
           <h1 className="text-xl md:text-2xl font-bold text-slate-900">
-            ⏳ Solicitud de Registro Enviada
+            <i className="bi bi-hourglass-split" aria-hidden="true" /> Solicitud de Registro Enviada
           </h1>
 
           <p className="mt-4 text-sm text-slate-600 leading-relaxed">
@@ -31,7 +23,9 @@ export default function PendingApproval() {
           <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
             <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
-              Estado actual: 🟡 Esperando Confirmación de Registro
+              Estado actual:{' '}
+              <i className="bi bi-hourglass-split" aria-hidden="true" /> Esperando Confirmación de
+              Registro
             </span>
           </div>
 

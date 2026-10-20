@@ -120,7 +120,9 @@ export default function CompanyProfile() {
 
       <form onSubmit={submit} className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
         <div className="lg:col-span-2 bg-white/80 rounded-3xl border border-slate-200 p-5 md:p-6">
-          <h2 className="text-sm uppercase tracking-[0.2em] text-slate-500 mb-5">🏢 Perfil B2B de la Empresa</h2>
+          <h2 className="text-sm uppercase tracking-[0.2em] text-slate-500 mb-5">
+            <i className="bi bi-building" aria-hidden="true" /> Perfil B2B de la Empresa
+          </h2>
 
           {loading ? (
             <p className="text-xs text-slate-400 py-8 text-center">Cargando perfil…</p>
@@ -156,7 +158,7 @@ export default function CompanyProfile() {
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-lime-400 outline-none"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
-                  📍 Punto de origen del GPS: todas las rutas se trazan desde aquí.
+                  <i className="bi bi-geo-alt-fill" aria-hidden="true" /> Punto de origen del GPS: todas las rutas se trazan desde aquí.
                 </p>
               </div>
 
@@ -191,7 +193,7 @@ export default function CompanyProfile() {
                   disabled={saving}
                   className="px-5 py-3 rounded-xl bg-slate-900 text-lime-400 text-sm font-bold hover:bg-slate-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Guardando…' : '💾 Guardar Cambios'}
+                  {saving ? 'Guardando…' : <><i className="bi bi-floppy-fill" aria-hidden="true" /> Guardar Cambios</>}
                 </button>
                 <button
                   type="button"

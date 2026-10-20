@@ -9,7 +9,7 @@ export default function Modal({ isOpen, onClose, title, children, footer }) {
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
           <h3 className="text-lg font-bold text-slate-900">{title}</h3>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
-            ✕
+            <i className="bi bi-x-lg" aria-hidden="true" />
           </button>
         </div>
         <div className="p-5">{children}</div>

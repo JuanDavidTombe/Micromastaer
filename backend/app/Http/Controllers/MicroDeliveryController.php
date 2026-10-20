@@ -63,6 +63,8 @@ class MicroDeliveryController extends Controller
             'order_id' => 'required|exists:orders,id',
             'payment_method' => 'required|in:cash,qr',
             'received_amount' => 'required|numeric|min:0',
+            'contingency' => 'sometimes|boolean',
+            'contingency_reason' => 'nullable|string|max:500',
         ]);
 
         $order = Order::findOrFail($request->order_id);
@@ -70,11 +72,23 @@ class MicroDeliveryController extends Controller
         $order->received_amount = $request->received_amount;
         $order->change_due = round($request->received_amount - $order->amount, 2);
         $order->payment_status = 'confirmed';
+
+        if ($request->boolean('contingency')) {
+            if (! $this->canBypass()) {
+                return $this->forbidden();
+            }
+            if (! $request->filled('contingency_reason')) {
+                return response()->json(['message' => 'El motivo de contingencia es obligatorio'], 422);
+            }
+            $order->contingency = true;
+            $order->contingency_reason = $request->contingency_reason;
+        }
+
         $order->save();
 
         return response()->json([
             'order' => $order,
-            'message' => 'Pago registrado exitosamente',
+            'message' => $order->contingency ? 'Pago registrado por contingencia' : 'Pago registrado exitosamente',
             'change_due' => $order->change_due,
         ]);
     }
@@ -128,5 +142,18 @@ class MicroDeliveryController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         return $user && in_array('update', $user->role_permissions['can'] ?? []);
+    }
+
+    public function canBypass(): bool
+    {
+        $user = Auth::guard('sanctum')->user();
+        if (! $user) {
+            return false;
+        }
+        return in_array($user->role, [
+            User::ROLE_ADMINISTRADOR,
+            User::ROLE_OPERARIO_LOGISTICO,
+            User::ROLE_SUPERVISOR_PRODUCCION,
+        ]);
     }
 }

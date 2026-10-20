@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import MicroCost from './pages/MicroCost';
 import MicroStock from './pages/MicroStock';
 import MicroDelivery from './pages/MicroDelivery';
+import MicroDeliveryOptimized from './pages/MicroDeliveryOptimized';
 import Orders from './pages/Orders';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -16,28 +18,35 @@ import { getDefaultRoute, hasModuleAccess, hasReadAccess } from './constants/rol
 const ROUTE_MODULES = {
   '/': 'dashboard',
   '/stock': 'inventory_stock',
+  '/stock/lotes': 'inventory_stock',
+  '/stock/entradas': 'inventory_stock',
+  '/stock/qr': 'inventory_stock',
+  '/stock/alertas': 'inventory_stock',
   '/cost': 'recipes_production',
+  '/cost/recetas': 'recipes_production',
+  '/cost/simulador': 'recipes_production',
+  '/cost/insumos': 'recipes_production',
   '/orders': 'orders_delivery',
   '/delivery': 'orders_delivery',
+  '/delivery/cobro': 'orders_delivery',
+  '/delivery/incidencias': 'orders_delivery',
   '/reports': 'reports_simulations',
+  '/reports/ventas': 'reports_simulations',
+  '/reports/pedidos': 'reports_simulations',
+  '/reports/inventario': 'reports_simulations',
+  '/reports/exportar': 'reports_simulations',
   '/settings': 'administration',
+  '/settings/config': 'administration',
 };
 
 function AuthenticatedApp({ user, setUser }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const mainRef = useRef(null);
 
-  // El rol es el emitido por Laravel Sanctum en /auth/login. No se modifica
-  // desde la interfaz: sólo el ADMINISTRADOR lo cambia en /settings#usuarios.
   const role = user?.role || 'ADMINISTRADOR';
 
-  // Refleja en el estado global (y en localStorage) los cambios que el
-  // usuario haga sobre su propio perfil desde el modal del Topbar.
-  //
-  // El merge se calcula FUERA del updater de setState: escribir en
-  // localStorage dentro de un updater es un efecto secundario que React
-  // puede ejecutar cero, una o dos veces según el batching.
   const userRef = useRef(user);
   userRef.current = user;
 
@@ -51,24 +60,20 @@ function AuthenticatedApp({ user, setUser }) {
   useEffect(() => {
     if (!user || location.pathname === '/login') return;
 
-    // /stock admite tambien acceso de SOLO LECTURA (supervisor consultando bodega)
-    const needsReadOnly = location.pathname === '/stock';
     const module = ROUTE_MODULES[location.pathname];
-    const allowed = needsReadOnly
-      ? hasReadAccess(role, 'inventory_stock')
-      : hasModuleAccess(role, module);
+    const allowed =
+      location.pathname === '/stock' || location.pathname.startsWith('/stock/')
+        ? hasReadAccess(role, 'inventory_stock')
+        : hasModuleAccess(role, module);
 
     if (!module || !allowed) {
       navigate(getDefaultRoute(role), { replace: true });
     }
   }, [role, location.pathname]);
 
-  // Anclajes internos: el sidebar navega a /ruta#seccion de la misma vista
   useEffect(() => {
-    if (!location.hash) return;
-    const el = document.getElementById(location.hash.slice(1));
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [location.pathname, location.hash]);
+    mainRef.current?.scrollTo({ top: 0 });
+  }, [location.pathname]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('micromaster_token');
@@ -79,10 +84,9 @@ function AuthenticatedApp({ user, setUser }) {
 
   return (
     <div className="flex h-dvh bg-cream overflow-hidden">
-      {/* Overlay móvil */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -92,41 +96,57 @@ function AuthenticatedApp({ user, setUser }) {
         onToggle={() => setSidebarOpen((v) => !v)}
         onLogout={handleLogout}
       />
-      <div className="flex-1 flex flex-col md:ml-64 min-w-0">
+      <div className="flex-1 flex flex-col lg:ml-64 min-w-0">
         <Topbar user={user} onMenuToggle={() => setSidebarOpen((v) => !v)} onProfileUpdated={handleProfileUpdated} />
-        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-6 bg-cream dark:bg-slate-900 transition-colors">
+        <main ref={mainRef} className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-6 bg-cream dark:bg-slate-900 transition-colors">
           <Routes>
-            {/* INICIO: exclusivo del administrador */}
             {hasModuleAccess(role, 'dashboard') && (
               <Route path="/" element={<Dashboard user={user} />} />
             )}
 
-            {/* INVENTARIO & STOCK: escritura para admin+operario, lectura para supervisor */}
             {hasReadAccess(role, 'inventory_stock') && (
-              <Route path="/stock" element={<MicroStock user={user} />} />
-            )}
-
-            {/* RECETAS & PRODUCCIÓN: admin + supervisor */}
-            {hasModuleAccess(role, 'recipes_production') && (
-              <Route path="/cost" element={<MicroCost user={user} />} />
-            )}
-
-            {/* PEDIDOS & ENTREGAS: admin + operario (una sola entrada, dos vistas) */}
-            {hasModuleAccess(role, 'orders_delivery') && (
               <>
-                <Route path="/orders" element={<Orders user={user} />} />
-                <Route path="/delivery" element={<MicroDelivery user={user} />} />
+                <Route path="/stock" element={<MicroStock user={user} />} />
+                <Route path="/stock/lotes" element={<MicroStock user={user} />} />
+                <Route path="/stock/entradas" element={<MicroStock user={user} />} />
+                <Route path="/stock/qr" element={<MicroStock user={user} />} />
+                <Route path="/stock/alertas" element={<MicroStock user={user} />} />
               </>
             )}
 
-            {/* REPORTES & SIMULACIONES: admin + contador (solo lectura/descarga) */}
-            {hasModuleAccess(role, 'reports_simulations') && (
-              <Route path="/reports" element={<Reports user={user} />} />
+            {hasModuleAccess(role, 'recipes_production') && (
+              <>
+                <Route path="/cost" element={<MicroCost user={user} />} />
+                <Route path="/cost/recetas" element={<MicroCost user={user} />} />
+                <Route path="/cost/simulador" element={<MicroCost user={user} />} />
+                <Route path="/cost/insumos" element={<MicroCost user={user} />} />
+              </>
             )}
 
-            {/* ADMINISTRACIÓN: solo admin */}
+            {hasModuleAccess(role, 'orders_delivery') && (
+              <>
+                <Route path="/orders" element={<Orders user={user} />} />
+                <Route path="/delivery" element={<MicroDeliveryOptimized user={user} />} />
+                <Route path="/delivery/cobro" element={<MicroDelivery user={user} />} />
+                <Route path="/delivery/incidencias" element={<MicroDelivery user={user} />} />
+              </>
+            )}
+
+            {hasModuleAccess(role, 'reports_simulations') && (
+              <>
+                <Route path="/reports" element={<Reports user={user} />} />
+                <Route path="/reports/ventas" element={<Reports user={user} />} />
+                <Route path="/reports/pedidos" element={<Reports user={user} />} />
+                <Route path="/reports/inventario" element={<Reports user={user} />} />
+                <Route path="/reports/exportar" element={<Reports user={user} />} />
+              </>
+            )}
+
             {hasModuleAccess(role, 'administration') && (
-              <Route path="/settings" element={<Settings user={user} />} />
+              <>
+                <Route path="/settings" element={<Settings user={user} />} />
+                <Route path="/settings/config" element={<Settings user={user} />} />
+              </>
             )}
 
             <Route path="*" element={<Navigate to={getDefaultRoute(role)} replace />} />
@@ -140,8 +160,6 @@ function AuthenticatedApp({ user, setUser }) {
 function App() {
   const [user, setUser] = useState(null);
 
-  // Aplica el tema oscuro ANTES de que se monte la interfaz, para que un
-  // recarga no desajuste el color. Tailwind usa la clase `dark` en <html>.
   useEffect(() => {
     document.documentElement.classList.toggle('dark', user?.theme === 'dark');
   }, [user?.theme]);
@@ -164,8 +182,6 @@ function App() {
     return (
       <Router>
         <Routes>
-          {/* PÚBLICAS: acceso sin sesión. El registro no entrega token,
-              la cuenta nace PENDING y debe aprobar el ADMINISTRADOR. */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/pending-approval" element={<PendingApproval />} />

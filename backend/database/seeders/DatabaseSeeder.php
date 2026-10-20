@@ -9,6 +9,8 @@ use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
 use App\Models\Batch;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Route;
 use App\Models\Order;
 use App\Models\DriverLocation;
@@ -135,11 +137,23 @@ class DatabaseSeeder extends Seeder
             [$onion->id,  'BCH-CEB-20250108', 'Cebollas del Norte',     'QR-CEB-0001-K26H', 400.0000,  20, 'optimal', -7],
         ];
 
+        $zones = [
+            $rice->id => 'A-01',
+            $beans->id => 'A-01',
+            $oil->id => 'B-01',
+            $chicken->id => 'Refrigerado',
+            $onion->id => 'C-01',
+            $salt->id => 'A-02',
+            $sauce->id => 'B-01',
+            $pepper->id => 'A-02',
+        ];
+
         foreach ($batches as [$ingId, $code, $supplier, $qr, $qty, $days, $status, $received]) {
             Batch::create([
                 'ingredient_id' => $ingId,
                 'batch_code' => $code,
                 'supplier_name' => $supplier,
+                'storage_zone' => $zones[$ingId] ?? 'A-01',
                 'qr_code_hash' => $qr,
                 'quantity' => $qty,
                 'initial_quantity' => $qty,
@@ -166,6 +180,7 @@ class DatabaseSeeder extends Seeder
                 'ingredient_id' => $ing->id,
                 'batch_code' => $code,
                 'supplier_name' => $supplier,
+                'storage_zone' => $zones[$ing->id] ?? 'A-02',
                 'qr_code_hash' => $qr,
                 'quantity' => $qty,
                 'initial_quantity' => $qty,
@@ -174,6 +189,36 @@ class DatabaseSeeder extends Seeder
                 'received_at' => $now->copy()->addDays($received),
             ]);
         }
+
+        // ------------------------------------------------------------------
+        // ÓRDENES DE COMPRA (cruce OC en la recepción de proveedores)
+        // ------------------------------------------------------------------
+        $po1 = PurchaseOrder::create([
+            'code' => 'OC-2026-001',
+            'supplier_name' => 'Arroz del Valle S.A.',
+            'expected_date' => $now->copy()->addDays(2),
+            'status' => 'pending',
+        ]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po1->id, 'ingredient_id' => $rice->id, 'expected_quantity' => 400]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po1->id, 'ingredient_id' => $beans->id, 'expected_quantity' => 250]);
+
+        $po2 = PurchaseOrder::create([
+            'code' => 'OC-2026-002',
+            'supplier_name' => 'Salsas Oriental S.A.',
+            'expected_date' => $now->copy()->addDays(4),
+            'status' => 'pending',
+        ]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po2->id, 'ingredient_id' => $sauce->id, 'expected_quantity' => 40]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po2->id, 'ingredient_id' => $oil->id, 'expected_quantity' => 120]);
+
+        $po3 = PurchaseOrder::create([
+            'code' => 'OC-2026-003',
+            'supplier_name' => 'Pollos Santa María',
+            'expected_date' => $now->copy()->addDays(1),
+            'status' => 'pending',
+        ]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po3->id, 'ingredient_id' => $chicken->id, 'expected_quantity' => 150]);
+        PurchaseOrderItem::create(['purchase_order_id' => $po3->id, 'ingredient_id' => $pepper->id, 'expected_quantity' => 10]);
 
         // ------------------------------------------------------------------
         // RUTAS (Google Maps): origen, destino, distancia/duración estimada

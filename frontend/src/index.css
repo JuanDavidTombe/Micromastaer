@@ -50,3 +50,14 @@ body {
 
 .animate-fade-in { animation: fade-in 0.35s ease-out both; }
 .animate-slide-up { animation: slide-up 0.25s ease-out both; }
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

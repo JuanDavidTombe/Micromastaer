@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DynamicTable({ columns, data, renderRow, className = '' }) {
+export default function DynamicTable({ columns, data, renderRow, rowClassName, className = '' }) {
   return (
     <div className={`bg-white/80 rounded-3xl border border-slate-200 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
@@ -16,7 +16,7 @@ export default function DynamicTable({ columns, data, renderRow, className = '' 
           </thead>
           <tbody className="divide-y divide-slate-100">
             {data.map((row, idx) => (
-              <tr key={row.id || idx} className="hover:bg-white/60 transition-colors">
+              <tr key={row.id || idx} className={`hover:bg-white/60 transition-colors ${rowClassName ? rowClassName(row, idx) : ''}`}>
                 {renderRow(row, idx)}
               </tr>
             ))}

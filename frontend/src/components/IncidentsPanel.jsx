@@ -4,10 +4,10 @@ import StatusBadge from './StatusBadge';
 import DriverAvatar from './DriverAvatar';
 
 const SEVERITY = {
-  critical: { stripe: 'bg-red-500', chip: 'bg-red-500/15 text-red-600', emoji: '🛑' },
-  warning: { stripe: 'bg-terracotta-500', chip: 'bg-terracotta-400/20 text-[#A44B1F]', emoji: '⚠️' },
-  attention: { stripe: 'bg-amber-400', chip: 'bg-amber-400/20 text-amber-700', emoji: '📍' },
-  info: { stripe: 'bg-sky-500', chip: 'bg-sky-500/15 text-sky-700', emoji: 'ℹ️' },
+  critical: { stripe: 'bg-red-500', chip: 'bg-red-500/15 text-red-600', icon: 'exclamation-octagon-fill' },
+  warning: { stripe: 'bg-terracotta-500', chip: 'bg-terracotta-400/20 text-[#A44B1F]', icon: 'exclamation-triangle-fill' },
+  attention: { stripe: 'bg-amber-400', chip: 'bg-amber-400/20 text-amber-700', icon: 'geo-alt-fill' },
+  info: { stripe: 'bg-sky-500', chip: 'bg-sky-500/15 text-sky-700', icon: 'info-circle-fill' },
 };
 
 const TYPES = [
@@ -77,7 +77,7 @@ export default function IncidentsPanel({
       <div className="space-y-3 overflow-y-auto pr-1 -mr-1" style={{ maxHeight: 560 }}>
         {incidents.length === 0 && (
           <div className="p-6 text-center rounded-2xl border border-dashed border-slate-200">
-            <div className="text-3xl mb-2">✅</div>
+            <div className="text-3xl mb-2"><i className="bi bi-check-circle-fill" aria-hidden="true" /></div>
             <p className="text-xs font-bold text-slate-600">Sin novedades</p>
             <p className="text-[11px] text-slate-400 mt-1">Ruta despejada en todo el día de operación.</p>
           </div>
@@ -101,7 +101,7 @@ export default function IncidentsPanel({
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${sev.chip}`}>
-                        {sev.emoji} {inc.type_label}
+                        <i className={"bi bi-" + sev.icon} aria-hidden="true" /> {inc.type_label}
                       </span>
                       <p className="text-xs font-semibold text-slate-800 mt-1.5 truncate">
                         {inc.route?.route_code} · Pedido #{inc.order_id}
@@ -130,7 +130,7 @@ export default function IncidentsPanel({
 
                   {inc.status === 'RESOLVED' && inc.resolution && (
                     <p className="text-[10px] text-green-700 bg-green-500/10 rounded-lg px-2 py-1 mt-2">
-                      ✓ {inc.resolution}
+                      <i className="bi bi-check-lg" aria-hidden="true" /> {inc.resolution}
                     </p>
                   )}
 
@@ -150,14 +150,14 @@ export default function IncidentsPanel({
                           onClick={() => onUpdate(inc.id, { status: 'RESOLVED', resolution: 'Resuelta desde el panel de Logística' })}
                           className="w-full py-2 rounded-lg bg-[#0F2133] text-lime-400 text-[11px] font-bold hover:bg-slate-800"
                         >
-                          ✓ Marcar como resuelta
+                          <i className="bi bi-check-lg" aria-hidden="true" /> Marcar como resuelta
                         </button>
                       ) : (
                         <button
                           onClick={() => onUpdate(inc.id, { status: 'OPEN' })}
                           className="w-full py-2 rounded-lg border border-slate-300 text-slate-600 text-[11px] font-bold hover:bg-white"
                         >
-                          ↺ Reabrir novedad
+                          <i className="bi bi-arrow-counterclockwise" aria-hidden="true" /> Reabrir novedad
                         </button>
                       )}
 

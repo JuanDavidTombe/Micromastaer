@@ -17,13 +17,6 @@ const FIELD =
   'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-lime-400 outline-none';
 const LABEL = 'text-xs uppercase tracking-wider text-slate-500 mb-1 block';
 
-/**
- * /register — ALTA PÚBLICA CON APROBACIÓN DEL ADMINISTRADOR.
- *
- * La cuenta se crea con status = PENDING y NO se entrega token: el acceso
- * sigue bloqueado hasta que el ADMINISTRADOR la apruebe en
- * /settings#usuarios → "Solicitudes Pendientes".
- */
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY);
@@ -45,7 +38,6 @@ export default function Register() {
 
     try {
       await auth.register(form);
-      // /pending-approval muestra el estado de espera; no guarda sesión.
       navigate('/pending-approval', { replace: true });
     } catch (err) {
       const data = err.response?.data;
@@ -73,7 +65,7 @@ export default function Register() {
 
         <div className="bg-white/85 rounded-3xl border border-slate-200 p-5 md:p-8 backdrop-blur-sm">
           <div className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200">
-            <span className="text-xl leading-none">⏳</span>
+            <i className="bi bi-hourglass-split text-xl leading-none" aria-hidden="true" />
             <p className="text-xs text-amber-900 leading-relaxed">
               Tu cuenta quedará <strong>en espera</strong> hasta que el{' '}
               <strong>Administrador de MicroMaster</strong> revise y apruebe esta

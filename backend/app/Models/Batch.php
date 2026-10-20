@@ -13,11 +13,16 @@ class Batch extends Model
         'ingredient_id',
         'batch_code',
         'supplier_name',
+        'storage_zone',
         'qr_code_hash',
         'quantity',
         'initial_quantity',
         'expiration_date',
         'status',
+        'is_quarantined',
+        'quarantine_reason',
+        'quality_status',
+        'purchase_order_code',
         'received_at',
     ];
 
@@ -26,6 +31,7 @@ class Batch extends Model
         'initial_quantity' => 'decimal:4',
         'expiration_date' => 'date',
         'received_at' => 'datetime',
+        'is_quarantined' => 'boolean',
     ];
 
     protected $appends = ['status_color', 'days_to_expire', 'remaining_percentage'];

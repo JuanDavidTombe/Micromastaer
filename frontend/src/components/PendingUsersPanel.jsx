@@ -26,11 +26,6 @@ function formatDate(iso) {
   });
 }
 
-/**
- * PendingUsersPanel — solicitudes de registro públicas (/register) que aún no
- * ha resuelto el ADMINISTRADOR. Tabla con datos del solicitante, aprobación
- * (con rol oficial asignable) y rechazo (con motivo opcional).
- */
 export default function PendingUsersPanel({ onChanged }) {
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
@@ -38,7 +33,7 @@ export default function PendingUsersPanel({ onChanged }) {
   const [error, setError] = useState('');
   const [toast, setToast] = useState(null);
 
-  const [target, setTarget] = useState(null); // { user, mode: 'approve' | 'reject' }
+  const [target, setTarget] = useState(null);
   const [role, setRole] = useState('');
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -67,7 +62,7 @@ export default function PendingUsersPanel({ onChanged }) {
 
   const openApprove = (u) => {
     setTarget({ user: u, mode: 'approve' });
-    setRole(u.requested_role || u.role); // por defecto, el rol solicitado
+    setRole(u.requested_role || u.role);
     setReason('');
     setError('');
   };
@@ -121,7 +116,7 @@ export default function PendingUsersPanel({ onChanged }) {
           onClick={load}
           className="px-4 py-2.5 rounded-xl bg-slate-900 text-lime-400 text-sm font-bold hover:bg-slate-800 transition-all"
         >
-          ⟳ Actualizar
+          <><i className="bi bi-arrow-clockwise" aria-hidden="true" /> Actualizar</>
         </button>
       </div>
 
@@ -143,7 +138,7 @@ export default function PendingUsersPanel({ onChanged }) {
         </div>
       ) : rows.length === 0 ? (
         <div className="p-10 text-center bg-white/80 rounded-3xl border border-slate-200">
-          <p className="text-3xl mb-2">✅</p>
+          <i className="bi bi-check-circle-fill text-3xl mb-2" aria-hidden="true" />
           <p className="text-sm font-bold text-slate-900">No hay solicitudes pendientes</p>
           <p className="text-xs text-slate-500 mt-1">
             Las solicitudes de /register aparecerán aquí para su aprobación.
@@ -151,7 +146,6 @@ export default function PendingUsersPanel({ onChanged }) {
         </div>
       ) : (
         <>
-          {/* Móvil: tarjetas */}
           <div className="md:hidden space-y-3">
             {rows.map((u) => (
               <div key={u.id} className="p-4 bg-white/85 rounded-2xl border border-slate-200">
@@ -187,20 +181,19 @@ export default function PendingUsersPanel({ onChanged }) {
                     onClick={() => openApprove(u)}
                     className="flex-1 px-3 py-2.5 rounded-xl text-[11px] font-bold bg-lime-400 text-slate-900 hover:bg-lime-500"
                   >
-                    ✓ Aprobar
+                    <><i className="bi bi-check-lg" aria-hidden="true" /> Aprobar</>
                   </button>
                   <button
                     onClick={() => openReject(u)}
                     className="flex-1 px-3 py-2.5 rounded-xl text-[11px] font-bold bg-red-50 text-red-600 border border-red-200"
                   >
-                    ✕ Rechazar
+                    <><i className="bi bi-x-lg" aria-hidden="true" /> Rechazar</>
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Escritorio: tabla */}
           <div className="hidden md:block bg-white/80 rounded-3xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -239,13 +232,13 @@ export default function PendingUsersPanel({ onChanged }) {
                             onClick={() => openApprove(u)}
                             className="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-lime-400 text-slate-900 hover:bg-lime-500 transition-all"
                           >
-                            ✓ Aprobar
+                            <><i className="bi bi-check-lg" aria-hidden="true" /> Aprobar</>
                           </button>
                           <button
                             onClick={() => openReject(u)}
                             className="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-all"
                           >
-                            ✕ Rechazar
+                            <><i className="bi bi-x-lg" aria-hidden="true" /> Rechazar</>
                           </button>
                         </div>
                       </td>

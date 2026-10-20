@@ -11,14 +11,16 @@ export default function FreshCard({ title, value, subtitle, icon, color = 'lime'
   const c = colorMap[color];
 
   return (
-    <div className={`${c.bg} border ${c.border} rounded-3xl p-5 backdrop-blur-sm hover:shadow-lg transition-all duration-300 ${className}`}>
-      <div className="flex items-start justify-between">
-        <div>
+    <div className={`${c.bg} border ${c.border} rounded-3xl p-4 md:p-5 backdrop-blur-sm hover:shadow-lg transition-all duration-300 ${className}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">{title}</p>
-          <p className={`text-2xl font-bold ${c.text}`}>{value}</p>
+          <p className={`text-[20px] leading-tight md:text-2xl font-bold truncate ${c.text}`}>{value}</p>
           {subtitle && <p className="text-[11px] text-slate-400 mt-1">{subtitle}</p>}
         </div>
-        <div className={`text-2xl ${c.icon}`}>{icon}</div>
+        <div className={`shrink-0 text-xl md:text-2xl ${c.icon}`}>
+          <i className={`bi bi-${icon}`} aria-hidden="true" />
+        </div>
       </div>
     </div>
   );

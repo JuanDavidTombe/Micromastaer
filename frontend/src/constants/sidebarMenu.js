@@ -1,13 +1,3 @@
-// ------------------------------------------------------------------
-// MENÚ LATERAL POR ROL — MICROMASTER
-// Espejo de navegación de la matriz RBAC (backend/app/Models/User.php).
-//
-//  - `modules` del rol determinan qué secciones aparecen.
-//  - Cada ítem apunta a una ruta existente y, si la vista tiene
-//    subsecciones, a un anclaje interno (#hash) de esa misma vista.
-//  - Ninguna lógica de componentes: sólo datos de navegación.
-// ------------------------------------------------------------------
-
 export const SIDEBAR_MENU = {
   OPERARIO_LOGISTICO: [
     {
@@ -15,7 +5,7 @@ export const SIDEBAR_MENU = {
       num: '01',
       label: 'PRINCIPAL',
       items: [
-        { icon: '📊', label: 'Inicio · Resumen Bodega', desc: 'Alertas de stock y entregas del día', to: { pathname: '/stock' } },
+        { icon: 'speedometer2', label: 'Inicio · Resumen Bodega', desc: 'Alertas de stock y entregas del día', to: '/stock' },
       ],
     },
     {
@@ -23,12 +13,11 @@ export const SIDEBAR_MENU = {
       num: '02',
       label: 'OPERACIÓN & LOGÍSTICA',
       items: [
-        { icon: '📦', label: 'Lotes FEFO', desc: 'Vencimiento, proveedor y cantidad', to: { pathname: '/stock', hash: '#lotes' } },
-        { icon: '📥', label: 'Entradas de Proveedores', desc: 'Recepción de mercancía', to: { pathname: '/stock', hash: '#entradas' } },
-        { icon: '⛶', label: 'Escáner QR', desc: 'Sincroniza el lote desde la app', to: { pathname: '/stock', hash: '#qr' } },
-        { icon: '🚚', label: 'Gestión de Pedidos', desc: 'Órdenes B2B y estados', to: { pathname: '/orders' } },
-        { icon: '🗺️', label: 'Rutas & Mapa GPS', desc: 'Trazado en vivo de conductores', to: { pathname: '/delivery' } },
-        { icon: '💰', label: 'Cobros, Caja & OTP', desc: 'Verificación y registro de pago', to: { pathname: '/delivery', hash: '#cobro' } },
+        { icon: 'box-seam', label: 'Lotes FEFO', desc: 'Vencimiento, proveedor y cantidad', to: '/stock/lotes' },
+        { icon: 'box-arrow-in-down', label: 'Entradas de Proveedores', desc: 'Recepción de mercancía', to: '/stock/entradas' },
+        { icon: 'truck', label: 'Gestión de Pedidos', desc: 'Órdenes B2B y estados', to: '/orders' },
+        { icon: 'geo-alt', label: 'Rutas & Mapa GPS', desc: 'Trazado en vivo de conductores', to: '/delivery' },
+        { icon: 'cash-coin', label: 'Cobros, Caja & OTP', desc: 'Verificación y registro de pago', to: '/delivery/cobro' },
       ],
     },
     {
@@ -36,8 +25,8 @@ export const SIDEBAR_MENU = {
       num: '03',
       label: 'CONTROL DE CAMPO',
       items: [
-        { icon: '🛑', label: 'Novedades e Incidencias', desc: 'Alertas de conductores en ruta', to: { pathname: '/delivery', hash: '#incidencias' } },
-        { icon: '📄', label: 'Reportes de Bodega', desc: 'Exportación de inventarios', to: { pathname: '/stock', hash: '#alertas' } },
+        { icon: 'exclamation-octagon', label: 'Novedades e Incidencias', desc: 'Alertas de conductores en ruta', to: '/delivery/incidencias' },
+        { icon: 'file-earmark-text', label: 'Reportes de Bodega', desc: 'Estado y alertas de inventario', to: '/stock/alertas' },
       ],
     },
   ],
@@ -48,7 +37,7 @@ export const SIDEBAR_MENU = {
       num: '01',
       label: 'PRINCIPAL',
       items: [
-        { icon: '📊', label: 'Inicio · Tablero de Cocina', desc: 'Tandas programadas para hoy', to: { pathname: '/cost' } },
+        { icon: 'speedometer2', label: 'Inicio · Tablero de Cocina', desc: 'Tandas programadas para hoy', to: '/cost' },
       ],
     },
     {
@@ -56,9 +45,9 @@ export const SIDEBAR_MENU = {
       num: '02',
       label: 'PRODUCCIÓN & RECETAS',
       items: [
-        { icon: '🍳', label: 'Catálogo de Recetas', desc: 'Fórmulas y mermas', to: { pathname: '/cost', hash: '#recetas' } },
-        { icon: '🧮', label: 'Simulador de Escala', desc: 'Kg para producción masiva', to: { pathname: '/cost', hash: '#simulador' } },
-        { icon: '🟢', label: 'Disponibilidad de Insumos', desc: 'Check automático de stock', to: { pathname: '/cost', hash: '#insumos' } },
+        { icon: 'egg-fried', label: 'Catálogo de Recetas', desc: 'Fórmulas y mermas', to: '/cost/recetas' },
+        { icon: 'calculator', label: 'Simulador de Escala', desc: 'Kg para producción masiva', to: '/cost/simulador' },
+        { icon: 'check2-circle', label: 'Disponibilidad de Insumos', desc: 'Check automático de stock', to: '/cost/insumos' },
       ],
     },
     {
@@ -66,7 +55,7 @@ export const SIDEBAR_MENU = {
       num: '03',
       label: 'CONTROL DE CALIDAD',
       items: [
-        { icon: '🗑️', label: 'Registro de Mermas', desc: 'Mermas e imprevistos de cocina', to: { pathname: '/cost', hash: '#recetas' } },
+        { icon: 'trash3', label: 'Registro de Mermas', desc: 'Mermas e imprevistos de cocina', to: '/cost/recetas' },
       ],
     },
   ],
@@ -77,7 +66,7 @@ export const SIDEBAR_MENU = {
       num: '01',
       label: 'PRINCIPAL',
       items: [
-        { icon: '📊', label: 'Inicio · Resumen Financiero', desc: 'Ingresos, costos y margen', to: { pathname: '/reports' } },
+        { icon: 'speedometer2', label: 'Inicio · Resumen Financiero', desc: 'Ingresos, costos y margen', to: '/reports' },
       ],
     },
     {
@@ -85,9 +74,9 @@ export const SIDEBAR_MENU = {
       num: '02',
       label: 'AUDITORÍA & CONCILIACIÓN',
       items: [
-        { icon: '📈', label: 'Reportes de Ventas B2B', desc: 'Ingresos y cobros confirmados', to: { pathname: '/reports', hash: '#ventas' } },
-        { icon: '💵', label: 'Conciliación de Caja & OTP', desc: 'Verificación de dinero recaudado', to: { pathname: '/reports', hash: '#pedidos' } },
-        { icon: '📦', label: 'Valoración de Inventario', desc: 'Costo total del stock en bodega', to: { pathname: '/reports', hash: '#inventario' } },
+        { icon: 'graph-up-arrow', label: 'Reportes de Ventas B2B', desc: 'Ingresos y cobros confirmados', to: '/reports/ventas' },
+        { icon: 'cash-stack', label: 'Conciliación de Caja & OTP', desc: 'Verificación de dinero recaudado', to: '/reports/pedidos' },
+        { icon: 'boxes', label: 'Valoración de Inventario', desc: 'Costo total del stock en bodega', to: '/reports/inventario' },
       ],
     },
     {
@@ -95,7 +84,7 @@ export const SIDEBAR_MENU = {
       num: '03',
       label: 'EXPORTACIÓN',
       items: [
-        { icon: '📥', label: 'Descarga de Informes', desc: 'Exportador masivo en CSV', to: { pathname: '/reports', hash: '#exportar' } },
+        { icon: 'download', label: 'Descarga de Informes', desc: 'Exportador masivo en CSV', to: '/reports/exportar' },
       ],
     },
   ],
@@ -106,35 +95,57 @@ export const SIDEBAR_MENU = {
       num: '01',
       label: 'PRINCIPAL',
       items: [
-        { icon: '📊', label: 'Inicio · Torre de Control', desc: 'KPIs y estado general', to: { pathname: '/' } },
+        { icon: 'speedometer2', label: 'Inicio · Torre de Control', desc: 'KPIs y estado general', to: '/' },
       ],
     },
     {
-      id: 'operacion',
+      id: 'inventario',
       num: '02',
-      label: 'OPERACIÓN',
+      label: 'INVENTARIO & STOCK',
       items: [
-        { icon: '📦', label: 'Inventario & Stock', desc: 'Lotes FEFO, proveedor y QR', to: { pathname: '/stock' } },
-        { icon: '⚙️', label: 'Recetas & Producción', desc: 'Fórmulas, costos y simulación', to: { pathname: '/cost' } },
-        { icon: '☰', label: 'Pedidos & Entregas', desc: 'Órdenes B2B', to: { pathname: '/orders' } },
-        { icon: '🗺️', label: 'Logística & Mapa GPS', desc: 'Rutas y novedades de campo', to: { pathname: '/delivery' } },
+        { icon: 'box-seam', label: 'Inventario & Stock', desc: 'Resumen de alertas de bodega', to: '/stock' },
+        { icon: 'calendar2-check', label: 'Lotes FEFO', desc: 'Vencimiento, proveedor y QR', to: '/stock/lotes' },
+        { icon: 'box-arrow-in-down', label: 'Entradas de Proveedores', desc: 'Recepción de mercancía', to: '/stock/entradas' },
+      ],
+    },
+    {
+      id: 'produccion',
+      num: '03',
+      label: 'PRODUCCIÓN',
+      items: [
+        { icon: 'gear', label: 'Recetas & Producción', desc: 'Tablero de cocina y stock', to: '/cost' },
+        { icon: 'egg-fried', label: 'Catálogo de Recetas', desc: 'Fórmulas y mermas', to: '/cost/recetas' },
+        { icon: 'calculator', label: 'Simulador de Escala', desc: 'Kg para producción masiva', to: '/cost/simulador' },
+      ],
+    },
+    {
+      id: 'logistica',
+      num: '04',
+      label: 'PEDIDOS & LOGÍSTICA',
+      items: [
+        { icon: 'list-task', label: 'Pedidos & Entregas', desc: 'Órdenes B2B y estados', to: '/orders' },
+        { icon: 'geo-alt', label: 'Rutas & Mapa GPS', desc: 'Rutas y novedades de campo', to: '/delivery' },
+        { icon: 'cash-coin', label: 'Cobros, Caja & OTP', desc: 'Verificación y registro de pago', to: '/delivery/cobro' },
+        { icon: 'exclamation-octagon', label: 'Novedades e Incidencias', desc: 'Alertas de conductores en ruta', to: '/delivery/incidencias' },
       ],
     },
     {
       id: 'analisis',
-      num: '03',
+      num: '05',
       label: 'ANÁLISIS & SISTEMA',
       items: [
-        { icon: '≫', label: 'Reportes & Simulaciones', desc: 'Exportación y conciliación', to: { pathname: '/reports' } },
+        { icon: 'bar-chart-line', label: 'Reportes & Simulaciones', desc: 'Resumen financiero', to: '/reports' },
+        { icon: 'graph-up-arrow', label: 'Ventas & Conciliación', desc: 'Ingresos y cobros confirmados', to: '/reports/ventas' },
+        { icon: 'download', label: 'Descarga de Informes', desc: 'Exportador masivo en CSV', to: '/reports/exportar' },
       ],
     },
     {
       id: 'administracion',
-      num: '05',
+      num: '06',
       label: 'ADMINISTRACIÓN',
       items: [
-        { icon: '👥', label: 'Gestión de Usuarios & Roles', desc: 'Equipo y matriz de permisos', to: { pathname: '/settings', hash: '#usuarios' } },
-        { icon: '⚙️', label: 'Configuración del Sistema', desc: 'Parámetros generales', to: { pathname: '/settings', hash: '#config' } },
+        { icon: 'people', label: 'Gestión de Usuarios & Roles', desc: 'Equipo y matriz de permisos', to: '/settings' },
+        { icon: 'sliders', label: 'Configuración del Sistema', desc: 'Parámetros generales', to: '/settings/config' },
       ],
     },
   ],
@@ -145,10 +156,10 @@ export const SIDEBAR_MENU = {
       num: '01',
       label: 'MI OPERACIÓN',
       items: [
-        { icon: '🚚', label: 'Mis Pedidos', desc: 'Órdenes asignadas a mi ruta', to: { pathname: '/orders' } },
-        { icon: '🗺️', label: 'Mi Ruta & Mapa GPS', desc: 'Trazado y posición en vivo', to: { pathname: '/delivery' } },
-        { icon: '🛑', label: 'Reportar Novedad', desc: 'Incidencias de campo', to: { pathname: '/delivery', hash: '#incidencias' } },
-        { icon: '💰', label: 'Cobro OTP', desc: 'Verificación de pago en ruta', to: { pathname: '/delivery', hash: '#cobro' } },
+        { icon: 'truck', label: 'Mis Pedidos', desc: 'Órdenes asignadas a mi ruta', to: '/orders' },
+        { icon: 'geo-alt', label: 'Mi Ruta & Mapa GPS', desc: 'Trazado y posición en vivo', to: '/delivery' },
+        { icon: 'exclamation-octagon', label: 'Reportar Novedad', desc: 'Incidencias de campo', to: '/delivery/incidencias' },
+        { icon: 'cash-coin', label: 'Cobro OTP', desc: 'Verificación de pago en ruta', to: '/delivery/cobro' },
       ],
     },
   ],

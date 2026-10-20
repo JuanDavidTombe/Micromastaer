@@ -16,11 +16,6 @@ class User extends Authenticatable
     const ROLE_CONTADOR = 'CONTADOR';
     const ROLE_TRANSPORTISTA = 'TRANSPORTISTA';
 
-    /* ------------------------------------------------------------------
-     |  ESTADOS DEL FLUJO DE REGISTRO CON APROBACIÓN
-     | ------------------------------------------------------------------ */
-
-    /** Registro enviado desde /register: existe pero NO puede iniciar sesión. */
     const STATUS_PENDING = 'PENDING';
 
     /** Aprobado por el administrador: acceso completo según su rol. */
@@ -31,8 +26,7 @@ class User extends Authenticatable
 
     /**
      * Roles que un solicitante puede pedir desde /register.
-     * ADMINISTRADOR queda excluido a propósito: sólo el ADMINISTRADOR vigente
-     * puede crear administradores, y lo hace desde /settings#usuarios.
+     * ADMINISTRADOR
      */
     public const REGISTRABLE_ROLES = [
         self::ROLE_OPERARIO_LOGISTICO,
@@ -80,16 +74,6 @@ class User extends Authenticatable
      *  SUPERVISOR_PRODUCC. | Solo consulta      | Completo             | Sin acceso         | Sin acceso     | Sin acceso
      *  CONTADOR            | Sin acceso         | Sin acceso           | Sin acceso         | Solo lectura   | Sin acceso
      *  TRANSPORTISTA       | Sin acceso         | Sin acceso           | Lectura + cobro    | Sin acceso     | Sin acceso
-     *
-     *  - 'modules'     => módulos con acceso COMPLETO (son los visibles en el Sidebar).
-     *  - 'read_modules'=> módulos con acceso de SOLO LECTURA a la API (no se muestran en el Sidebar).
-     *  - 'can'         => acciones globales permitidas. El CONTADOR solo tiene 'read' y 'download',
-     *                     por lo que cualquier POST/PUT/DELETE responde 403 (ver WriteGuardMiddleware).
-     *
-     *  TRANSPORTISTA (conductor): usa la app móvil para enviar GPS y reportar incidencias,
-     *  por eso tiene 'create' y 'update' pero NO 'delete' ni 'download'. No puede crear
-     *  rutas ni resolver incidencias: esos endpoints están detrás de
-     *  RoleMiddleware(ADMINISTRADOR,OPERARIO_LOGISTICO).
      */
     public const ROLE_PERMISSIONS = [
         self::ROLE_ADMINISTRADOR => [

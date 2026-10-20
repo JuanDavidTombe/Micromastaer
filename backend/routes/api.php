@@ -14,33 +14,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\ModulePermissionMiddleware;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes — MATRIZ RBAC MICROMASTER  (5 roles)
-|--------------------------------------------------------------------------
-|
-|  ADMINISTRADOR          : los 5 módulos (create/read/update/delete/download)
-|  OPERARIO_LOGISTICO     : inventory_stock + orders_delivery (sin delete)
-|  SUPERVISOR_PRODUCCION  : recipes_production (lectura de inventory_stock)
-|  CONTADOR               : reports_simulations (solo lectura/descarga)
-|  TRANSPORTISTA          : orders_delivery — rutas y pedidos PROPIOS
-|
-|  write.guard (Kernel, grupo 'api') bloquea POST/PUT/PATCH/DELETE a los
-|  roles sin la acción correspondiente => el CONTADOR recibe 403 global.
-|
-|  RoleMiddleware acepta varios roles; ModulePermissionMiddleware acepta
-|  el sufijo ':read' para módulos de sólo lectura.
-|
-*/
-
-/*
-|--------------------------------------------------------------------------
-| RUTAS PÚBLICAS (sin token)
-|--------------------------------------------------------------------------
-| /auth/register es el único alta de cuentas sin sesión: guarda al
-| solicitante con status = PENDING y NO devuelve token, así que el acceso
-| sigue bloqueado hasta que el ADMINISTRADOR lo apruebe.
-*/
 Route::post('/auth/register', [AuthController::class, 'register'])
     ->middleware('throttle:10,1');
 
@@ -49,18 +22,6 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum', 'write.guard'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-
-    /*
-    |------------------------------------------------------------------
-    | PERFIL DEL USUARIO AUTENTICADO  (modal de 4 pestañas del Topbar)
-    |------------------------------------------------------------------
-    | Disponible para CUALQUIER rol: cada quien gestiona su propia cuenta.
-    | Exento de write.guard (ver WriteGuardMiddleware::EXEMPT_PREFIXES) para
-    | que el CONTADOR también pueda cambiar su contraseña y preferencias.
-    |
-    | El campo `role` NO se edita aquí: los permisos dependen sólo del login
-    | de Sanctum y los cambia el ADMINISTRADOR desde /settings#usuarios.
-    */
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::patch('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto']);
@@ -69,28 +30,18 @@ Route::middleware(['auth:sanctum', 'write.guard'])->group(function () {
     Route::patch('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::patch('/profile/preferences', [ProfileController::class, 'updatePreferences']);
     Route::delete('/profile/sessions', [ProfileController::class, 'revokeSessions']);
-
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
-    /*
-    |------------------------------------------------------------------
-    | INVENTARIO & STOCK  (inventory_stock)
-    |------------------------------------------------------------------
-    | Acceso COMPLETO  : ADMINISTRADOR, OPERARIO_LOGISTICO
-    | Solo LECTURA     : SUPERVISOR_PRODUCCION  (read_modules)
-    | Sin acceso       : CONTADOR, TRANSPORTISTA
-    */
     Route::middleware(RoleMiddleware::class.':ADMINISTRADOR,OPERARIO_LOGISTICO,SUPERVISOR_PRODUCCION')->group(function () {
         Route::get('/stock/batches', [MicroStockController::class, 'index']);
         Route::get('/stock/alerts', [MicroStockController::class, 'alerts']);
         Route::get('/stock/ingredients', [MicroStockController::class, 'ingredientStock']);
+        Route::get('/stock/purchase-orders/{code}', [MicroStockController::class, 'purchaseOrder']);
     });
-
     Route::middleware(RoleMiddleware::class.':ADMINISTRADOR,OPERARIO_LOGISTICO')->group(function () {
         Route::post('/stock/batches', [MicroStockController::class, 'store']);
         Route::post('/stock/entry', [MicroStockController::class, 'entry']);
         Route::post('/stock/exit', [MicroStockController::class, 'exit']);
-
+        Route::patch('/stock/batches/{id}/block', [MicroStockController::class, 'block']);
         // *** Sincronización QR (app móvil -> API web) ***
         Route::post('/stock/qr-scan', [MicroStockController::class, 'qrScan']);
     });

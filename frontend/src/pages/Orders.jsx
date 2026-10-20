@@ -4,7 +4,6 @@ import FreshCard from '../components/FreshCard';
 import TechBadge from '../components/TechBadge';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
-import ModuleTabs from '../components/ModuleTabs';
 import DynamicTable from '../components/DynamicTable';
 import { hasModuleAccess, can } from '../constants/roles';
 
@@ -31,8 +30,6 @@ export default function Orders({ user }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   const canAccess = hasModuleAccess(role, 'orders_delivery');
-  // El TRANSPORTISTA sólo consulta sus pedidos: la gestión la hacen
-  // ADMINISTRADOR y OPERARIO_LOGISTICO (coherente con la API).
   const isManager = role === 'ADMINISTRADOR' || role === 'OPERARIO_LOGISTICO';
   const canCreate = can(role, 'create') && isManager;
   const canUpdate = can(role, 'update') && isManager;
@@ -137,7 +134,7 @@ export default function Orders({ user }) {
     return (
       <div className="flex items-center justify-center h-full bg-cream">
         <div className="text-center">
-          <div className="text-6xl mb-4">🔒</div>
+          <div className="text-6xl mb-4"><i className="bi bi-lock-fill" aria-hidden="true" /></div>
           <h2 className="text-xl font-bold text-slate-900">Acceso Denegado</h2>
           <p className="text-sm text-slate-500 mt-2">No tienes permisos para acceder a Pedidos</p>
           <p className="text-xs text-slate-400 mt-4">Rol: {user?.role_label}</p>
@@ -173,22 +170,21 @@ export default function Orders({ user }) {
           <h1 className="text-2xl font-bold text-slate-900">Pedidos & Entregas</h1>
           <p className="text-sm text-slate-500">Gestión de órdenes de clientes, rutas y cobro</p>
         </div>
-        <div className="flex gap-3 items-center">
-          <ModuleTabs tabs={[{ path: '/orders', label: 'Pedidos' }, { path: '/delivery', label: 'Logística' }]} />
-          <TechBadge label="GESTIÓN DE ÓRDENES" color="lime" />
-          {canCreate && (
-            <button onClick={openCreate} className="bg-lime-400 hover:bg-lime-500 text-slate-900 px-4 py-2 rounded-xl text-sm font-bold transition-all">
-              + Nuevo Pedido
-            </button>
-          )}
-        </div>
+          <div className="flex gap-3 items-center">
+            <TechBadge label="GESTIÓN DE ÓRDENES" color="lime" />
+            {canCreate && (
+              <button onClick={openCreate} className="bg-lime-400 hover:bg-lime-500 text-slate-900 px-4 py-2 rounded-xl text-sm font-bold transition-all">
+                + Nuevo Pedido
+              </button>
+            )}
+          </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <FreshCard title="Total Pedidos" value={summary?.total || 0} subtitle="En sistema" icon="📋" color="lime" />
-        <FreshCard title="Pendientes" value={summary?.pending || 0} subtitle="Sin ruta asignada" icon="🕐" color="slate" />
-        <FreshCard title="En Tránsito" value={summary?.in_transit || 0} subtitle="En camino" icon="🚚" color="terracotta" />
-        <FreshCard title="Monto Total" value={`$${(summary?.total_amount || 0).toLocaleString()}`} subtitle="Valor órdenes" icon="💵" color="lime" />
+        <FreshCard title="Total Pedidos" value={summary?.total || 0} subtitle="En sistema" icon="clipboard" color="lime" />
+        <FreshCard title="Pendientes" value={summary?.pending || 0} subtitle="Sin ruta asignada" icon="clock" color="slate" />
+        <FreshCard title="En Tránsito" value={summary?.in_transit || 0} subtitle="En camino" icon="truck" color="terracotta" />
+        <FreshCard title="Monto Total" value={`$${(summary?.total_amount || 0).toLocaleString()}`} subtitle="Valor órdenes" icon="cash-coin" color="lime" />
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">

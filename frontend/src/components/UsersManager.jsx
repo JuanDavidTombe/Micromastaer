@@ -39,7 +39,6 @@ export default function UsersManager({ currentUser }) {
   const [toast, setToast] = useState(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
-  // Pestañas: personal vigente vs. solicitudes públicas en espera de aprobación.
   const [tab, setTab] = useState('staff');
 
   const [showModal, setShowModal] = useState(false);
@@ -69,8 +68,6 @@ export default function UsersManager({ currentUser }) {
   };
 
   const visible = useMemo(() => {
-    // Las solicitudes PENDING se gestionan en su propia pestaña; la tabla de
-    // personal muestra únicamente las cuentas ya resueltas (ACTIVE/REJECTED).
     const settled = data.users.filter((u) => u.status !== 'PENDING');
     if (filter === 'all') return settled;
     return settled.filter((u) => (filter === 'active' ? u.is_active : !u.is_active));
@@ -197,10 +194,10 @@ export default function UsersManager({ currentUser }) {
       ) : (
         <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <FreshCard title="Total Personal" value={data.total} subtitle="Usuarios registrados" icon="👥" color="slate" />
-        <FreshCard title="Activos" value={data.active} subtitle="Con acceso" icon="✅" color="lime" />
-        <FreshCard title="Inactivos" value={data.inactive} subtitle="Acceso bloqueado" icon="⛔" color="terracotta" />
-        <FreshCard title="Roles" value={data.roles.length} subtitle="En la matriz RBAC" icon="🛡️" color="cream" />
+        <FreshCard title="Total Personal" value={data.total} subtitle="Usuarios registrados" icon="people" color="slate" />
+        <FreshCard title="Activos" value={data.active} subtitle="Con acceso" icon="check-circle-fill" color="lime" />
+        <FreshCard title="Inactivos" value={data.inactive} subtitle="Acceso bloqueado" icon="slash-circle" color="terracotta" />
+        <FreshCard title="Roles" value={data.roles.length} subtitle="En la matriz RBAC" icon="shield-check" color="cream" />
       </div>
 
       <div className="bg-white/80 rounded-3xl border border-slate-200 overflow-hidden">
@@ -227,7 +224,6 @@ export default function UsersManager({ currentUser }) {
           </div>
         </div>
 
-        {/* Vista de tarjetas en móvil (la tabla se desborda en pantallas pequeñas) */}
         <div className="md:hidden divide-y divide-slate-100">
           {loading && <p className="p-6 text-center text-xs text-slate-400">Cargando personal…</p>}
           {!loading && visible.length === 0 && (

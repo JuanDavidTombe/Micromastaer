@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import UserProfileModal from './UserProfileModal';
 
-/**
- * Topbar de MicroMaster.
- *
- * SEGURIDAD: la etiqueta verde de rol es ESTÁTICA e informativa. No abre
- * ningún menú, no permite cambiar de usuario ni simular vistas. Los permisos
- * dependen exclusivamente del login de Laravel Sanctum.
- *
- * El control interactivo de la esquina superior derecha es el AVATAR, que
- * abre el modal de Perfil de Usuario en 4 pestañas.
- */
 export default function Topbar({ user, onMenuToggle, onProfileUpdated }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const roleLabel = user?.role_label || 'Usuario';
 
-  // Cierra el modal con la tecla Escape.
   useEffect(() => {
     if (!profileOpen) return;
     const onKey = (e) => e.key === 'Escape' && setProfileOpen(false);
@@ -29,27 +18,26 @@ export default function Topbar({ user, onMenuToggle, onProfileUpdated }) {
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <button
             onClick={onMenuToggle}
-            className="md:hidden shrink-0 w-10 h-10 -ml-1 flex items-center justify-center rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
+            className="lg:hidden shrink-0 w-10 h-10 -ml-1 flex items-center justify-center rounded-xl hover:bg-white/10 active:bg-white/15 transition-colors"
             title="Menú"
             aria-label="Abrir menú"
           >
-            <span className="text-xl leading-none">☰</span>
+            <i className="bi bi-list text-xl leading-none" aria-hidden="true" />
           </button>
-          <div className="h-4 w-px bg-white/20 hidden md:block"></div>
-          <div className="hidden md:flex items-center gap-2">
+          <div className="h-4 w-px bg-white/20 hidden lg:block"></div>
+          <div className="hidden lg:flex items-center gap-2">
             <span className="text-xs uppercase tracking-[0.2em] text-white/50">MICROMASTER B2B</span>
             <span className="text-xs bg-lime-400 text-slate-900 px-2 py-0.5 rounded font-bold">LIVE</span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 min-w-0">
-          <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5">
-            <span className="text-xs text-white/50">🔍</span>
+          <div className="hidden lg:flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5">
+            <i className="bi bi-search text-xs" aria-hidden="true" />
             <input type="text" placeholder="Buscar..." className="bg-transparent text-xs outline-none w-40 text-white placeholder:text-white/30" />
           </div>
 
           <div className="flex items-center gap-2 min-w-0">
-            {/* Etiqueta de rol: SOLO INFORMATIVA (sin interacción) */}
             <span
               title="Rol asignado por el administrador del sistema"
               className="text-[10px] md:text-xs bg-lime-400/20 text-lime-400 px-2 py-1 rounded-lg font-mono truncate max-w-[7.5rem] md:max-w-none select-none cursor-default"
@@ -57,7 +45,6 @@ export default function Topbar({ user, onMenuToggle, onProfileUpdated }) {
               {roleLabel}
             </span>
 
-            {/* Avatar: abre el Perfil de Usuario */}
             <button
               type="button"
               onClick={() => setProfileOpen(true)}

@@ -33,8 +33,8 @@ export default function RouteFormModal({ isOpen, onClose, orders = [], drivers =
   const destination = useMemo(() => {
     const uniq = [...new Set(chosen.map((o) => o.destination))];
     if (!uniq.length) return '—';
-    if (uniq.length <= 2) return uniq.join(' → ');
-    return `${uniq[0]} → +${uniq.length - 1} paradas`;
+    if (uniq.length <= 2) return uniq.join(' · ');
+    return `${uniq[0]} · +${uniq.length - 1} paradas`;
   }, [chosen]);
 
   const canSubmit = driverId && date && selected.length > 0 && !creating;

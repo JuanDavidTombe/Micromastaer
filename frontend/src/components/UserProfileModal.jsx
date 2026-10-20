@@ -1,23 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { profile as profileApi, auth } from '../services/api';
 
-/**
- * Modal de PERFIL DE USUARIO en 4 pestañas.
- *
- *  1. Información personal y contacto   (editable)
- *  2. Información laboral y operación   (lectura: rol, sede, turno, jefe)
- *  3. Seguridad y accesos               (contraseña, 2FA, sesiones activas)
- *  4. Preferencias de la aplicación     (idioma, tema, notificaciones)
- *
- * SEGURIDAD: el campo `role` NO se edita aquí. El rol lo asigna el
- * administrador en /settings#usuarios y viaja en el token de Sanctum.
- */
-
 const TABS = [
-  { id: 'personal', label: 'Personal y Contacto', icon: '📌' },
-  { id: 'laboral', label: 'Laboral y Operación', icon: '🏭' },
-  { id: 'seguridad', label: 'Seguridad y Accesos', icon: '🔐' },
-  { id: 'preferencias', label: 'Preferencias', icon: '⚙️' },
+  { id: 'personal', label: 'Personal y Contacto', icon: 'pin-angle' },
+  { id: 'laboral', label: 'Laboral y Operación', icon: 'buildings' },
+  { id: 'seguridad', label: 'Seguridad y Accesos', icon: 'shield-lock' },
+  { id: 'preferencias', label: 'Preferencias', icon: 'gear' },
 ];
 
 const ROLE_BADGE = {
@@ -52,7 +40,7 @@ function Switch({ checked, onChange, label, desc, icon }) {
       className="w-full flex items-center justify-between gap-4 p-3.5 rounded-2xl bg-cream hover:bg-cream/70 transition-colors text-left"
     >
       <span className="min-w-0 flex items-start gap-3">
-        <span className="text-base leading-none mt-0.5">{icon}</span>
+        <i className={`bi bi-${icon} text-base leading-none mt-0.5`} aria-hidden="true" />
         <span className="min-w-0">
           <span className="block text-xs font-bold text-slate-900">{label}</span>
           {desc && <span className="block text-[10px] text-slate-500 leading-tight mt-0.5">{desc}</span>}
@@ -135,7 +123,6 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     }
   }, []);
 
-  // La fotografía requiere cabecera Authorization: se pide como blob.
   const loadPhoto = useCallback(async () => {
     try {
       const res = await profileApi.getPhoto();
@@ -143,7 +130,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
         setPhotoPreview(URL.createObjectURL(res.data));
       }
     } catch {
-      setPhotoPreview(null); // sin fotografía: se muestran las iniciales
+      setPhotoPreview(null);
     }
   }, []);
 
@@ -153,14 +140,11 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     setTab('personal');
     setPasswords({ current_password: '', password: '', password_confirmation: '' });
 
-    // La foto sólo se pide si el perfil la referencia: evita un 404 en consola
-    // cuando el usuario aún no ha cargado ninguna imagen.
     load().then((p) => {
       if (p?.photo_url) loadPhoto();
     });
   }, [isOpen, load, loadPhoto]);
 
-  // Aplica el tema inmediatamente (antes de guardar) a toda la aplicación.
   const applyTheme = useCallback((theme) => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, []);
@@ -273,7 +257,6 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     }
   };
 
-  /** CERRAR SESIÓN: borra el token local y vuelve a /login. */
   const logout = async () => {
     setSaving(true);
     try {
@@ -294,7 +277,6 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 backdrop-blur-sm p-3">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden animate-slide-up">
-        {/* Cabecera */}
         <div className="flex items-start justify-between gap-4 p-4 md:p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 shrink-0 rounded-2xl bg-lime-400/30 flex items-center justify-center overflow-hidden">
@@ -321,11 +303,10 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
             aria-label="Cerrar"
             className="w-8 h-8 shrink-0 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
           >
-            ✕
+            <i className="bi bi-x-lg" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Pestañas */}
         <div className="px-3 md:px-5 pt-3 shrink-0">
           <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
             {TABS.map((t) => (
@@ -336,14 +317,13 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   tab === t.id ? 'bg-slate-900 text-lime-400 shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 }`}
               >
-                <span className="text-xs leading-none">{t.icon}</span>
+                <i className={`bi bi-${t.icon} text-xs leading-none`} aria-hidden="true" />
                 {t.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Mensajes */}
         {(toast || error) && (
           <div className="px-4 md:px-5 pt-3 shrink-0">
             {toast && <div className="px-3.5 py-2.5 rounded-xl bg-slate-900 text-lime-400 text-[11px] font-bold animate-fade-in">{toast}</div>}
@@ -351,12 +331,10 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
           </div>
         )}
 
-        {/* Contenido */}
         <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-5">
           {loading ? (
             <p className="text-xs text-slate-400 text-center py-10">Cargando perfil…</p>
           ) : tab === 'personal' ? (
-            /* ---------- PESTAÑA 1 ---------- */
             <div className="space-y-5">
               <section className="bg-cream rounded-2xl p-4">
                 <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-3">Fotografía de Perfil</h3>
@@ -375,7 +353,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                       disabled={saving}
                       className="px-3.5 py-2 rounded-xl bg-slate-900 text-lime-400 text-[11px] font-bold hover:bg-slate-800 disabled:opacity-40"
                     >
-                      📷 {photoPreview ? 'Actualizar foto' : 'Cargar foto'}
+                      <i className="bi bi-camera" aria-hidden="true" /> {photoPreview ? 'Actualizar foto' : 'Cargar foto'}
                     </button>
                     {photoPreview && (
                       <button
@@ -431,12 +409,11 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   disabled={saving || !personal.name || !personal.email}
                   className="px-5 py-2.5 rounded-xl bg-slate-900 text-lime-400 text-xs font-bold hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
-                  {saving ? 'Guardando…' : '💾 Guardar Información'}
+                  {saving ? 'Guardando…' : <><i className="bi bi-floppy" aria-hidden="true" /> Guardar Información</>}
                 </button>
               </form>
             </div>
           ) : tab === 'laboral' ? (
-            /* ---------- PESTAÑA 2 ---------- */
             <div className="space-y-4">
               <div className="bg-slate-900 text-white rounded-2xl p-5">
                 <h3 className="text-[10px] uppercase tracking-[0.2em] text-lime-400 mb-4">Rol Asignado</h3>
@@ -455,22 +432,22 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   ))}
                 </div>
                 <p className="text-[10px] text-white/40 mt-3 leading-snug">
-                  🔒 El rol lo asigna el administrador en Gestión de Usuarios & Roles. No puede modificarse desde el perfil.
+                  <i className="bi bi-lock-fill" aria-hidden="true" /> El rol lo asigna el administrador en Gestión de Usuarios & Roles. No puede modificarse desde el perfil.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: '🏭', label: 'Sede / Bodega', value: p.warehouse_site },
-                  { icon: '🕐', label: 'Horario / Turno', value: p.shift_schedule },
-                  { icon: '👤', label: 'Jefe Directo', value: p.supervisor_name },
-                  { icon: '🆔', label: 'Código de Empleado', value: p.employee_code },
-                  { icon: '📧', label: 'Correo', value: p.email },
-                  { icon: '📱', label: 'Teléfono', value: p.phone },
+                  { icon: 'buildings', label: 'Sede / Bodega', value: p.warehouse_site },
+                  { icon: 'clock', label: 'Horario / Turno', value: p.shift_schedule },
+                  { icon: 'person', label: 'Jefe Directo', value: p.supervisor_name },
+                  { icon: 'upc-scan', label: 'Código de Empleado', value: p.employee_code },
+                  { icon: 'envelope', label: 'Correo', value: p.email },
+                  { icon: 'phone', label: 'Teléfono', value: p.phone },
                 ].map((f) => (
                   <div key={f.label} className="bg-cream rounded-2xl p-4">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-sm leading-none">{f.icon}</span>
+                      <i className={`bi bi-${f.icon} text-sm leading-none`} aria-hidden="true" />
                       <span className="text-[9px] uppercase tracking-[0.15em] text-slate-500 font-bold">{f.label}</span>
                     </div>
                     <p className="text-sm font-semibold text-slate-900 break-words">{f.value || '—'}</p>
@@ -484,12 +461,12 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   <p className="text-sm font-semibold text-slate-900 mt-0.5">{formatDateTime(p.last_login_at)}</p>
                 </div>
                 <span className={`shrink-0 px-2 py-1 rounded-lg text-[9px] font-bold ${p.is_active ? 'bg-green-500/15 text-green-700' : 'bg-red-500/15 text-red-600'}`}>
-                  {p.is_active ? '● ACTIVO' : '● INACTIVO'}
+                  <i className={`bi bi-${p.is_active ? 'check-circle-fill' : 'slash-circle-fill'}`} aria-hidden="true" />{' '}
+                  {p.is_active ? 'ACTIVO' : 'INACTIVO'}
                 </span>
               </div>
             </div>
           ) : tab === 'seguridad' ? (
-            /* ---------- PESTAÑA 3 ---------- */
             <div className="space-y-5">
               <form onSubmit={savePassword} className="bg-cream rounded-2xl p-4 space-y-3.5">
                 <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Cambio de Contraseña</h3>
@@ -504,14 +481,14 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   disabled={saving || !passwords.current_password || passwords.password.length < 6 || !passwords.password_confirmation}
                   className="px-4 py-2.5 rounded-xl bg-slate-900 text-lime-400 text-[11px] font-bold hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
-                  🔑 Actualizar Contraseña
+                  <i className="bi bi-key" aria-hidden="true" /> Actualizar Contraseña
                 </button>
               </form>
 
               <div className="space-y-3">
                 <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Autenticación en Dos Pasos (2FA)</h3>
                 <Switch
-                  icon="🛡️"
+                  icon="shield-check"
                   checked={prefs.two_factor_enabled}
                   onChange={(v) => setPrefs({ ...prefs, two_factor_enabled: v })}
                   label="Verificación en dos pasos"
@@ -546,7 +523,13 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-900 truncate">{s.device}</p>
                         <p className="text-[10px] text-slate-500">
-                          {s.is_current ? '● Esta sesión' : `Último uso: ${formatDateTime(s.last_used_at)}`}
+                          {s.is_current ? (
+                            <>
+                              <i className="bi bi-check-circle-fill text-lime-600" aria-hidden="true" /> Esta sesión
+                            </>
+                          ) : (
+                            `Último uso: ${formatDateTime(s.last_used_at)}`
+                          )}
                         </p>
                       </div>
                       {s.is_current ? (
@@ -571,7 +554,6 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               </div>
             </div>
           ) : (
-            /* ---------- PESTAÑA 4 ---------- */
             <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -590,8 +572,8 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 mb-1.5 block">Tema Visual</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { v: 'light', label: 'Modo Claro', icon: '☀️' },
-                      { v: 'dark', label: 'Modo Oscuro', icon: '🌙' },
+                      { v: 'light', label: 'Modo Claro', icon: 'sun' },
+                      { v: 'dark', label: 'Modo Oscuro', icon: 'moon-stars' },
                     ].map((t) => (
                       <button
                         key={t.v}
@@ -602,7 +584,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
-                        <span className="mr-1.5">{t.icon}</span>{t.label}
+                        <i className={`bi bi-${t.icon} mr-1.5`} aria-hidden="true" />{t.label}
                       </button>
                     ))}
                   </div>
@@ -612,11 +594,11 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               <div>
                 <h3 className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-3">Configuración de Notificaciones</h3>
                 <div className="space-y-2">
-                  <Switch icon="📩" checked={prefs.notify_email} onChange={(v) => setPrefs({ ...prefs, notify_email: v })}
+                  <Switch icon="envelope" checked={prefs.notify_email} onChange={(v) => setPrefs({ ...prefs, notify_email: v })}
                     label="Alertas por Correo Electrónico" desc="Resumen diario de pedidos e incidencias." />
-                  <Switch icon="🔔" checked={prefs.notify_push} onChange={(v) => setPrefs({ ...prefs, notify_push: v })}
+                  <Switch icon="bell" checked={prefs.notify_push} onChange={(v) => setPrefs({ ...prefs, notify_push: v })}
                     label="Notificaciones Push en Celular" desc="Avisos instantáneos en el dispositivo móvil." />
-                  <Switch icon="🔊" checked={prefs.notify_sound} onChange={(v) => setPrefs({ ...prefs, notify_sound: v })}
+                  <Switch icon="volume-up" checked={prefs.notify_sound} onChange={(v) => setPrefs({ ...prefs, notify_sound: v })}
                     label="Alertas de Sonido" desc="Nuevo pedido o incidencia en ruta." />
                 </div>
               </div>
@@ -626,13 +608,12 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                 disabled={saving}
                 className="px-5 py-2.5 rounded-xl bg-slate-900 text-lime-400 text-xs font-bold hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
-                {saving ? 'Guardando…' : '💾 Guardar Preferencias'}
+                {saving ? 'Guardando…' : <><i className="bi bi-floppy" aria-hidden="true" /> Guardar Preferencias</>}
               </button>
             </div>
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between gap-3 p-4 md:p-5 border-t border-slate-100 shrink-0">
           <span className="text-[10px] text-slate-400 hidden sm:block">
             Sesión autenticada por Laravel Sanctum
@@ -649,7 +630,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               disabled={saving}
               className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all"
             >
-              ⏻  CERRAR SESIÓN
+              <i className="bi bi-power" aria-hidden="true" /> CERRAR SESIÓN
             </button>
           </div>
         </div>
